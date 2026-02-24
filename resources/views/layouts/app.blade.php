@@ -4,161 +4,646 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Jornal a Borda')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #ff2d20;
-            --dark-bg: #1a1a1a;
+            --primary-color: #e63946;
+            --primary-dark: #d62839;
+            --secondary-color: #457b9d;
+            --accent-color: #f1faee;
+            --dark-bg: #1d3557;
+            --text-dark: #2b2d42;
+            --text-light: #6c757d;
+            --border-color: #e9ecef;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.7;
+            background: #fafbfc;
+            font-size: 16px;
         }
-        .header-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-dark);
         }
+
+        /* Header Styles */
+        .header-top {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #2a4a6b 100%);
+            padding: 12px 0;
+            color: white;
+        }
+
         .logo-area {
-            padding: 15px 0;
+            padding: 20px 0;
+            background: white;
+            box-shadow: var(--shadow-sm);
         }
-        .logo img {
-            max-height: 50px;
+
+        .logo h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            letter-spacing: -0.5px;
         }
+
+        .logo a {
+            text-decoration: none;
+        }
+
+        .header-nav {
+            background: white;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0;
         }
+
         .navbar-nav .nav-link {
-            color: #333;
+            color: var(--text-dark);
             font-weight: 500;
-            padding: 10px 15px;
-            transition: color 0.3s;
+            padding: 18px 20px;
+            transition: var(--transition);
+            position: relative;
+            font-size: 15px;
         }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 3px;
+            background: var(--primary-color);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link.active::after {
+            transform: scaleX(1);
+        }
+
         .navbar-nav .nav-link:hover {
             color: var(--primary-color);
+            background: var(--accent-color);
         }
-        .post-block-style {
-            margin-bottom: 30px;
-            background: #fff;
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow-md);
             border-radius: 8px;
+            padding: 8px 0;
+            margin-top: 8px;
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            padding: 20px 0;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: var(--text-light);
+            padding: 0 8px;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Post Cards */
+        .post-block-style {
+            background: white;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            margin-bottom: 30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
+
         .post-block-style:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
         }
+
+        .post-thumb {
+            position: relative;
+            overflow: hidden;
+            height: 280px;
+        }
+
         .post-thumb img {
             width: 100%;
-            height: 250px;
+            height: 100%;
             object-fit: cover;
+            transition: var(--transition);
         }
+
+        .post-block-style:hover .post-thumb img {
+            transform: scale(1.05);
+        }
+
+        .grid-cat {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 10;
+        }
+
         .post-cat {
             display: inline-block;
             background: var(--primary-color);
             color: white;
-            padding: 5px 15px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 12px;
-            text-decoration: none;
-            margin-bottom: 10px;
-        }
-        .post-title a {
-            color: #333;
-            text-decoration: none;
             font-weight: 600;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
         }
+
+        .post-cat:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .post-content {
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-title {
+            margin: 0 0 12px 0;
+        }
+
+        .post-title a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1.3;
+            transition: var(--transition);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .post-title a:hover {
             color: var(--primary-color);
         }
+
         .post-meta {
-            color: #666;
-            font-size: 14px;
+            color: var(--text-light);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
+
         .post-meta img {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            margin-right: 8px;
+            border: 2px solid var(--border-color);
         }
-        .breadcrumb {
-            background: transparent;
-            padding: 15px 0;
+
+        .post-meta a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
         }
-        .breadcrumb a {
+
+        .post-meta a:hover {
+            color: var(--primary-color);
+        }
+
+        .entry-blog-summery {
+            color: var(--text-light);
+            font-size: 15px;
+            line-height: 1.7;
+            flex: 1;
+        }
+
+        .readmore-btn {
             color: var(--primary-color);
             text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
         }
-        .copy-right {
-            background: var(--dark-bg);
-            color: #fff;
-            padding: 20px 0;
-            margin-top: 50px;
+
+        .readmore-btn:hover {
+            gap: 10px;
+            color: var(--primary-dark);
         }
+
+        /* Sidebar */
         .sidebar {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 100px;
         }
+
+        .sidebar h4 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .sidebar .list-unstyled li {
+            margin-bottom: 12px;
+        }
+
+        .sidebar .list-unstyled a {
+            color: var(--text-dark);
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar .list-unstyled a:hover {
+            color: var(--primary-color);
+            padding-left: 8px;
+        }
+
+        .sidebar .badge {
+            background: var(--primary-color);
+            font-size: 11px;
+            padding: 4px 10px;
+        }
+
+        /* Pagination */
+        .pagination {
+            margin-top: 40px;
+            justify-content: center;
+        }
+
         .pagination .page-link {
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            margin: 0 4px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .pagination .page-link:hover {
+            background: var(--accent-color);
+            border-color: var(--primary-color);
             color: var(--primary-color);
         }
+
         .pagination .page-item.active .page-link {
             background: var(--primary-color);
             border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Footer */
+        .copy-right {
+            background: var(--dark-bg);
+            color: white;
+            padding: 30px 0;
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .copy-right p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Author Box */
+        .author-box {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 40px;
+        }
+
+        .author-box img {
+            border: 4px solid white;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Category Title */
+        .category-main-title {
+            margin-bottom: 30px;
+        }
+
+        .category-main-title h1,
+        .category-main-title h2 {
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .category-main-title h1::after,
+        .category-main-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        /* Single Post Styles */
+        .post-single .post-title {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .post-single .post-media {
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .post-single .post-media img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .post-single .entry-content {
+            font-size: 18px;
+            line-height: 1.9;
+            color: var(--text-dark);
+        }
+
+        .post-single .entry-content p {
+            margin-bottom: 24px;
+        }
+
+        .post-single .entry-content h2 {
+            font-size: 2rem;
+            margin: 40px 0 20px 0;
+            color: var(--text-dark);
+        }
+
+        .post-single .entry-content h3 {
+            font-size: 1.6rem;
+            margin: 32px 0 16px 0;
+            color: var(--text-dark);
+        }
+
+        .post-single .entry-content ul,
+        .post-single .entry-content ol {
+            margin: 20px 0;
+            padding-left: 30px;
+        }
+
+        .post-single .entry-content li {
+            margin-bottom: 12px;
+        }
+
+        /* Post Navigation */
+        .post-navigation {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .post-previous,
+        .post-next {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .post-previous:hover,
+        .post-next:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(5px);
+        }
+
+        .post-next:hover {
+            transform: translateX(-5px);
+        }
+
+        /* Comment Form */
+        .comment-form {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            margin-top: 40px;
+        }
+
+        .comment-form .form-control {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: var(--transition);
+        }
+
+        .comment-form .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .post-single .post-title {
+                font-size: 2rem;
+            }
+
+            .category-main-title h1,
+            .category-main-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .post-thumb {
+                height: 200px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-block-style {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
         }
     </style>
     @stack('styles')
 </head>
 <body>
-    <!-- Header Middle Area -->
-    <div class="header-middle-area">
+    <!-- Header Top -->
+    <div class="header-top d-none d-md-block">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 col-lg-3 align-self-center">
-                    <div class="logo-area">
-                        <a href="{{ route('home') }}" class="logo">
-                            <h2 class="text-primary fw-bold">Jornal a Borda</h2>
-                        </a>
-                    </div>
+                <div class="col-12 text-end">
+                    <small>Jornalismo com propósito • Notícias que importam</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Header -->
-    <header id="header" class="header header-gradient">
-        <div class="header-wrapper">
-            <div class="container">
-                <nav class="navbar navbar-expand-lg navbar-light">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('home') }}">Início</a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="categoriasDropdown" role="button" data-bs-toggle="dropdown">
-                                    Categorias
-                                </a>
-                                <ul class="dropdown-menu">
-                                    @foreach($categories ?? [] as $category)
-                                    <li><a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">{{ $category->name }}</a></li>
-                                    @endforeach
-                                </ul>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Sobre Nós</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Nossa Equipe</a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
+    <!-- Logo Area -->
+    <div class="logo-area">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <a href="{{ route('home') }}" class="logo">
+                        <h2>Jornal a Borda</h2>
+                    </a>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <header class="header-nav">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                                <i class="bi bi-house-door me-1"></i>Início
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="categoriasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-grid me-1"></i>Categorias
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="categoriasDropdown">
+                                @foreach($categories ?? [] as $category)
+                                <li><a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">{{ $category->name }}</a></li>
+                                @endforeach
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-info-circle me-1"></i>Sobre Nós
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-people me-1"></i>Nossa Equipe
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
         </div>
     </header>
 
@@ -178,23 +663,22 @@
     @endif
 
     <!-- Main Content -->
-    <main id="main-content" class="blog main-container">
+    <main id="main-content" class="blog main-container py-4">
         @yield('content')
     </main>
 
     <!-- Footer -->
-    <div class="copy-right">
+    <footer class="copy-right">
         <div class="container">
             <div class="row">
-                <div class="col-md-11 align-self-center copyright-text text-center">
+                <div class="col-12">
                     <p>Desenvolvido com muito carinho pela equipe de T.I do Jornal a Borda ♥, {{ date('Y') }}</p>
                 </div>
             </div>
         </div>
-    </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
 </body>
 </html>
-
