@@ -308,20 +308,20 @@
                 <i class="bi bi-speedometer2"></i>
                 <span>Dashboard</span>
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('admin.profile*') ? 'active' : '' }}" href="{{ route('admin.profile') }}">
                 <i class="bi bi-person"></i>
                 <span>Perfil</span>
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('admin.posts*') ? 'active' : '' }}" href="{{ route('admin.posts.index') }}">
                 <i class="bi bi-file-text"></i>
                 <span>Posts</span>
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('admin.comments*') ? 'active' : '' }}" href="{{ route('admin.comments.index') }}">
                 <i class="bi bi-chat-dots"></i>
                 <span>Comentários</span>
             </a>
             @if(auth()->user()->isAdmin())
-            <a class="nav-link" href="#">
+            <a class="nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
                 <i class="bi bi-gear"></i>
                 <span>Configurações</span>
             </a>

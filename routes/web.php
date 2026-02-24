@@ -8,6 +8,10 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\PostController as AdminPostController;
+use App\Http\Controllers\Admin\CommentController;
+use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -30,6 +34,23 @@ if (app()->environment('local')) {
 // Admin Routes
 Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Profile
+    Route::get('/perfil', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
+    
+    // Posts
+    Route::resource('posts', AdminPostController::class);
+    
+    // Comments
+    Route::get('/comentarios', [CommentController::class, 'index'])->name('comments.index');
+    Route::put('/comentarios/{comment}/status', [CommentController::class, 'updateStatus'])->name('comments.updateStatus');
+    Route::delete('/comentarios/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    
+    // Settings (Admin only)
+    Route::get('/configuracoes', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/configuracoes', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/configuracoes/test-email', [SettingsController::class, 'testEmail'])->name('settings.testEmail');
 });
 
 // Post Route (must be last)
