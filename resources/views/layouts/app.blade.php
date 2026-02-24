@@ -632,15 +632,28 @@
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">
                                 <i class="bi bi-info-circle me-1"></i>Sobre Nós
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('team') ? 'active' : '' }}" href="{{ route('team') }}">
                                 <i class="bi bi-people me-1"></i>Nossa Equipe
                             </a>
                         </li>
+                        @auth
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                                <i class="bi bi-speedometer2 me-1"></i>Painel
+                            </a>
+                        </li>
+                        @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
+                        @endauth
                     </ul>
                 </div>
             </nav>

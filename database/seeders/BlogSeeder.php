@@ -13,34 +13,29 @@ class BlogSeeder extends Seeder
 {
     public function run(): void
     {
-        // Criar usuários (autores)
-        $authors = [
-            User::create([
-                'name' => 'Fernanda Matos Oliveira',
-                'email' => 'fernanda@jornalaborda.com.br',
-                'password' => bcrypt('password'),
-            ]),
-            User::create([
-                'name' => 'Carol Magalhães',
-                'email' => 'carol@jornalaborda.com.br',
-                'password' => bcrypt('password'),
-            ]),
-            User::create([
-                'name' => 'Barbara Marques',
-                'email' => 'barbara@jornalaborda.com.br',
-                'password' => bcrypt('password'),
-            ]),
-            User::create([
-                'name' => 'Luís Novais',
-                'email' => 'luis@jornalaborda.com.br',
-                'password' => bcrypt('password'),
-            ]),
-            User::create([
-                'name' => 'Ellen L. Pedrosa',
-                'email' => 'ellen@jornalaborda.com.br',
-                'password' => bcrypt('password'),
-            ]),
-        ];
+        // Usar usuários existentes (criados pelo TeamSeeder)
+        $authors = User::whereIn('email', [
+            'fernanda@jornalaborda.com.br',
+            'vivian@jornalaborda.com.br',
+            'nahiana@jornalaborda.com.br',
+            'edina@jornalaborda.com.br',
+            'kamila@jornalaborda.com.br',
+        ])->get();
+
+        // Se não existirem, criar alguns usuários básicos
+        if ($authors->isEmpty()) {
+            $authors = collect([
+                User::firstOrCreate(
+                    ['email' => 'fernanda@jornalaborda.com.br'],
+                    [
+                        'name' => 'Fernanda Matos',
+                        'password' => bcrypt('password'),
+                        'role' => 'author',
+                        'position' => 'Redatora',
+                    ]
+                ),
+            ]);
+        }
 
         // Criar categorias
         $categories = [

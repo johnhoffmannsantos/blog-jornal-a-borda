@@ -22,6 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'bio',
+        'avatar',
+        'position',
     ];
 
     /**
@@ -50,5 +54,25 @@ class User extends Authenticatable
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class, 'author_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isEditor(): bool
+    {
+        return $this->role === 'editor';
+    }
+
+    public function isAuthor(): bool
+    {
+        return $this->role === 'author';
+    }
+
+    public function canManageAllPosts(): bool
+    {
+        return $this->isAdmin() || $this->isEditor();
     }
 }
