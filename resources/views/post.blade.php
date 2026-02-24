@@ -53,7 +53,7 @@
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <span class="fw-bold me-2"><i class="bi bi-tags"></i> Tags:</span>
                                 @foreach($post->tags as $tag)
-                                <a href="#" class="badge bg-secondary text-decoration-none px-3 py-2" style="font-size: 13px; font-weight: 500;">
+                                <a href="{{ route('tag.show', $tag->slug) }}" class="badge bg-secondary text-decoration-none px-3 py-2" style="font-size: 13px; font-weight: 500;">
                                     {{ $tag->name }}
                                 </a>
                                 @endforeach

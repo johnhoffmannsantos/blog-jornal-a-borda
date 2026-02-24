@@ -20,25 +20,31 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'bio' => ['nullable', 'string', 'max:500'],
-            'position' => ['nullable', 'string', 'max:255'],
-            'current_password' => ['nullable', 'required_with:password'],
-            'password' => ['nullable', 'min:8', 'confirmed'],
-        ]);
+        // Se está alterando senha, validar apenas campos de senha
+        if ($request->filled('current_password')) {
+            $validated = $request->validate([
+                'current_password' => ['required'],
+                'password' => ['required', 'min:8', 'confirmed'],
+            ]);
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->bio = $validated['bio'] ?? null;
-        $user->position = $validated['position'] ?? null;
-
-        if ($request->filled('password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors(['current_password' => 'Senha atual incorreta']);
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                return back()->withErrors(['current_password' => 'Senha atual incorreta'])->withInput();
             }
+
             $user->password = Hash::make($validated['password']);
+        } else {
+            // Se não está alterando senha, validar e atualizar informações pessoais
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'bio' => ['nullable', 'string', 'max:500'],
+                'position' => ['nullable', 'string', 'max:255'],
+            ]);
+
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+            $user->bio = $validated['bio'] ?? null;
+            $user->position = $validated['position'] ?? null;
         }
 
         $user->save();

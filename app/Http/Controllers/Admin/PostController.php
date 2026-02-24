@@ -18,6 +18,19 @@ class PostController extends Controller
         
         $query = Post::with(['author', 'category', 'tags']);
 
+        // Query base para estatísticas (sem filtros de busca/filtro)
+        $statsQuery = Post::query();
+        if (!$user->canManageAllPosts()) {
+            $statsQuery->where('author_id', $user->id);
+        }
+
+        // Calcular estatísticas
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'published' => (clone $statsQuery)->where('status', 'published')->count(),
+            'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
+        ];
+
         // Filtros baseados no role
         if (!$user->canManageAllPosts()) {
             $query->where('author_id', $user->id);
@@ -41,7 +54,7 @@ class PostController extends Controller
         $posts = $query->orderBy('created_at', 'desc')->paginate(15);
         $categories = Category::all();
 
-        return view('admin.posts.index', compact('posts', 'categories'));
+        return view('admin.posts.index', compact('posts', 'categories', 'stats'));
     }
 
     public function create()

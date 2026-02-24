@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -33,6 +34,7 @@ class SettingsController extends Controller
             'site_name' => ['required', 'string', 'max:255'],
             'site_description' => ['required', 'string', 'max:500'],
             'site_email' => ['required', 'email', 'max:255'],
+            'site_logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
             
             // SMTP Settings
             'mail_mailer' => ['required', 'string', 'in:smtp,sendmail,log'],
@@ -45,17 +47,37 @@ class SettingsController extends Controller
             'mail_from_name' => ['required', 'string', 'max:255'],
         ]);
 
+        // Processar upload da logo
+        $logoPath = Setting::get('site_logo');
+        if ($request->hasFile('site_logo')) {
+            // Deletar logo antiga se existir
+            if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            
+            // Salvar nova logo
+            $logoPath = $request->file('site_logo')->store('logos', 'public');
+        }
+
         // Atualizar configurações do site
         Setting::set('site_name', $validated['site_name'], 'text', 'site', 'Nome do site');
         Setting::set('site_description', $validated['site_description'], 'text', 'site', 'Descrição do site');
         Setting::set('site_email', $validated['site_email'], 'email', 'site', 'Email de contato do site');
+        if ($logoPath) {
+            Setting::set('site_logo', $logoPath, 'text', 'site', 'Logo do site');
+        }
 
         // Atualizar configurações SMTP
         Setting::set('mail_mailer', $validated['mail_mailer'], 'text', 'smtp', 'Driver de email');
         Setting::set('mail_host', $validated['mail_host'] ?? '', 'text', 'smtp', 'Servidor SMTP');
         Setting::set('mail_port', $validated['mail_port'] ?? '587', 'number', 'smtp', 'Porta SMTP');
         Setting::set('mail_username', $validated['mail_username'] ?? '', 'text', 'smtp', 'Usuário SMTP');
-        Setting::set('mail_password', $validated['mail_password'] ?? '', 'text', 'smtp', 'Senha SMTP');
+        
+        // Só atualizar senha se foi fornecida
+        if (!empty($validated['mail_password'])) {
+            Setting::set('mail_password', $validated['mail_password'], 'text', 'smtp', 'Senha SMTP');
+        }
+        
         Setting::set('mail_encryption', $validated['mail_encryption'] ?? 'tls', 'text', 'smtp', 'Criptografia');
         Setting::set('mail_from_address', $validated['mail_from_address'], 'email', 'smtp', 'Email remetente');
         Setting::set('mail_from_name', $validated['mail_from_name'], 'text', 'smtp', 'Nome do remetente');

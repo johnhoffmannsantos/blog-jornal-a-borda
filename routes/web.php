@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TagController as PublicTagController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\TeamController;
@@ -11,6 +12,9 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\CommentController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +24,7 @@ Route::get('/sobre-nos', [AboutController::class, 'index'])->name('about');
 Route::get('/nossa-equipe', [TeamController::class, 'index'])->name('team');
 Route::get('/autor/{id}', [AuthorController::class, 'show'])->name('author.show');
 Route::get('/categoria/{slug}', [CategoryController::class, 'show'])->name('category.show');
+Route::get('/tag/{slug}', [PublicTagController::class, 'show'])->name('tag.show');
 
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -41,6 +46,17 @@ Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     
     // Posts
     Route::resource('posts', AdminPostController::class);
+    
+    // Categories
+    Route::resource('categories', AdminCategoryController::class);
+    Route::delete('/categories/{category}/force', [AdminCategoryController::class, 'forceDestroy'])->name('categories.forceDestroy');
+    
+    // Tags
+    Route::resource('tags', TagController::class);
+    Route::delete('/tags/{tag}/force', [TagController::class, 'forceDestroy'])->name('tags.forceDestroy');
+    
+    // Users (Admin only)
+    Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
     
     // Comments
     Route::get('/comentarios', [CommentController::class, 'index'])->name('comments.index');

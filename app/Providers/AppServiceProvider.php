@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Definir locale para português brasileiro
+        app()->setLocale('pt_BR');
     }
 }

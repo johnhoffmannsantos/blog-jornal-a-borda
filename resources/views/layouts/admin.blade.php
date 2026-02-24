@@ -316,11 +316,23 @@
                 <i class="bi bi-file-text"></i>
                 <span>Posts</span>
             </a>
+            <a class="nav-link {{ request()->routeIs('admin.categories*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">
+                <i class="bi bi-folder"></i>
+                <span>Categorias</span>
+            </a>
+            <a class="nav-link {{ request()->routeIs('admin.tags*') ? 'active' : '' }}" href="{{ route('admin.tags.index') }}">
+                <i class="bi bi-tags"></i>
+                <span>Tags</span>
+            </a>
             <a class="nav-link {{ request()->routeIs('admin.comments*') ? 'active' : '' }}" href="{{ route('admin.comments.index') }}">
                 <i class="bi bi-chat-dots"></i>
                 <span>Comentários</span>
             </a>
             @if(auth()->user()->isAdmin())
+            <a class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                <i class="bi bi-people"></i>
+                <span>Usuários</span>
+            </a>
             <a class="nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
                 <i class="bi bi-gear"></i>
                 <span>Configurações</span>
@@ -335,6 +347,230 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Global Loading Script for Submit Buttons -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aplicar loading em todos os botões de submit
+            const forms = document.querySelectorAll('form');
+            
+            forms.forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    const submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+                    
+                    submitButtons.forEach(function(button) {
+                        if (!button.classList.contains('loading')) {
+                            button.classList.add('loading');
+                            button.disabled = true;
+                            
+                            // Salvar conteúdo original
+                            const originalHTML = button.innerHTML;
+                            button.dataset.originalHTML = originalHTML;
+                            
+                            // Adicionar spinner e texto
+                            const icon = button.querySelector('i');
+                            if (icon) {
+                                icon.style.display = 'none';
+                            }
+                            
+                            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+            position: relative;
+        }
+        
+        .btn.loading .spinner-border {
+            display: inline-block !important;
+        }
+    </style>
+    
+    <!-- Modal de Confirmação -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Exclusão
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmDeleteMessage">Tem certeza que deseja excluir este item?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </button>
+                    <form id="confirmDeleteForm" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger" id="confirmDeleteButton">
+                            <i class="bi bi-trash me-2"></i>Excluir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="toastNotification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+            <div class="toast-header">
+                <i id="toastIcon" class="bi me-2"></i>
+                <strong class="me-auto" id="toastTitle">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Mensagem aqui
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de Toasts
+        function showToast(type, message, title = null) {
+            const toast = document.getElementById('toastNotification');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastInstance = new bootstrap.Toast(toast);
+
+            // Configurar ícone e cor baseado no tipo
+            let iconClass = '';
+            let bgClass = '';
+            
+            switch(type) {
+                case 'success':
+                    iconClass = 'bi-check-circle-fill text-success';
+                    bgClass = 'bg-success text-white';
+                    title = title || 'Sucesso!';
+                    break;
+                case 'error':
+                case 'danger':
+                    iconClass = 'bi-exclamation-triangle-fill text-danger';
+                    bgClass = 'bg-danger text-white';
+                    title = title || 'Erro!';
+                    break;
+                case 'warning':
+                    iconClass = 'bi-exclamation-circle-fill text-warning';
+                    bgClass = 'bg-warning text-dark';
+                    title = title || 'Atenção!';
+                    break;
+                case 'info':
+                    iconClass = 'bi-info-circle-fill text-info';
+                    bgClass = 'bg-info text-white';
+                    title = title || 'Informação';
+                    break;
+                default:
+                    iconClass = 'bi-info-circle-fill text-primary';
+                    bgClass = 'bg-primary text-white';
+                    title = title || 'Notificação';
+            }
+
+            toastIcon.className = iconClass + ' me-2';
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            // Aplicar cor ao header
+            toast.querySelector('.toast-header').className = 'toast-header ' + bgClass;
+            
+            toastInstance.show();
+        }
+
+        // Mostrar toast baseado em mensagens de sessão
+        @if(session('success'))
+            showToast('success', @json(session('success')));
+        @endif
+
+        @if(session('error'))
+            showToast('error', @json(session('error')));
+        @endif
+
+        @if(session('info'))
+            showToast('info', @json(session('info')));
+        @endif
+
+        @if(session('warning'))
+            showToast('warning', @json(session('warning')));
+        @endif
+
+        // Sistema de Modal de Confirmação
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            const confirmForm = document.getElementById('confirmDeleteForm');
+            const confirmMessage = document.getElementById('confirmDeleteMessage');
+
+            // Interceptar todos os formulários de exclusão
+            document.querySelectorAll('form[method="POST"]').forEach(function(form) {
+                const methodInput = form.querySelector('input[name="_method"][value="DELETE"]');
+                
+                if (methodInput) {
+                    // É um formulário de exclusão
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Obter mensagem do onsubmit ou usar padrão
+                        const onsubmitAttr = form.getAttribute('onsubmit');
+                        let message = 'Tem certeza que deseja excluir este item?';
+                        
+                        if (onsubmitAttr && onsubmitAttr.includes('confirm')) {
+                            // Extrair mensagem do confirm
+                            const match = onsubmitAttr.match(/confirm\(['"]([^'"]+)['"]\)/);
+                            if (match) {
+                                message = match[1].replace(/\\'/g, "'").replace(/\\"/g, '"');
+                            }
+                        }
+                        
+                        confirmMessage.textContent = message;
+                        confirmForm.action = form.action;
+                        
+                        // Limpar apenas os inputs hidden, mantendo o botão
+                        const confirmButton = document.getElementById('confirmDeleteButton');
+                        confirmForm.querySelectorAll('input[type="hidden"]').forEach(function(input) {
+                            input.remove();
+                        });
+                        
+                        // Adicionar CSRF token
+                        const csrfToken = form.querySelector('input[name="_token"]');
+                        if (csrfToken) {
+                            const tokenInput = csrfToken.cloneNode(true);
+                            confirmForm.insertBefore(tokenInput, confirmButton);
+                        }
+                        
+                        // Adicionar método DELETE
+                        const methodInputNew = document.createElement('input');
+                        methodInputNew.type = 'hidden';
+                        methodInputNew.name = '_method';
+                        methodInputNew.value = 'DELETE';
+                        confirmForm.insertBefore(methodInputNew, confirmButton);
+                        
+                        // Adicionar outros campos hidden se houver
+                        form.querySelectorAll('input[type="hidden"]:not([name="_token"]):not([name="_method"])').forEach(function(input) {
+                            const hiddenInput = input.cloneNode(true);
+                            confirmForm.insertBefore(hiddenInput, confirmButton);
+                        });
+                        
+                        confirmModal.show();
+                    });
+                    
+                    // Remover onsubmit original se existir
+                    if (form.hasAttribute('onsubmit')) {
+                        form.removeAttribute('onsubmit');
+                    }
+                }
+            });
+        });
+    </script>
+
     @stack('scripts')
 </body>
 </html>

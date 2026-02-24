@@ -15,12 +15,38 @@
     </a>
 </div>
 
-@if(session('success'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+{{-- Mensagens serão exibidas via Toast --}}
+
+<!-- Cards de Estatísticas -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-file-text"></i>
+            </div>
+            <div class="stat-value">{{ $stats['total'] }}</div>
+            <p class="stat-label">Total de Posts</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-success bg-opacity-10 text-success">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-value">{{ $stats['published'] }}</div>
+            <p class="stat-label">Publicados</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-file-earmark"></i>
+            </div>
+            <div class="stat-value">{{ $stats['draft'] }}</div>
+            <p class="stat-label">Rascunhos</p>
+        </div>
+    </div>
 </div>
-@endif
 
 <!-- Filtros -->
 <div class="admin-card mb-4">

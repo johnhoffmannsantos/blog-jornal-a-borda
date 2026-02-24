@@ -600,7 +600,14 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <a href="{{ route('home') }}" class="logo">
-                        <h2>Jornal a Borda</h2>
+                        @php
+                            $logo = \App\Models\Setting::get('site_logo');
+                        @endphp
+                        @if($logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($logo))
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($logo) }}" alt="{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}" style="max-height: 60px; max-width: 300px;">
+                        @else
+                            <h2>{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}</h2>
+                        @endif
                     </a>
                 </div>
             </div>
