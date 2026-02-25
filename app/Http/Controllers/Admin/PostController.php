@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -71,11 +72,21 @@ class PostController extends Controller
             'excerpt' => ['required', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'category_id' => ['required', 'exists:categories,id'],
-            'featured_image' => ['nullable', 'url', 'max:500'],
+            'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
             'status' => ['required', 'in:draft,published'],
             'published_at' => ['nullable', 'date'],
             'tags' => ['nullable', 'array'],
         ]);
+
+        $featuredImage = null;
+
+        // Processar upload de imagem se houver
+        if ($request->hasFile('featured_image_file')) {
+            $file = $request->file('featured_image_file');
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('posts/featured', $filename, 'public');
+            $featuredImage = Storage::disk('public')->url($path);
+        }
 
         $post = Post::create([
             'title' => $validated['title'],
@@ -84,7 +95,7 @@ class PostController extends Controller
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
             'author_id' => Auth::id(),
-            'featured_image' => $validated['featured_image'] ?? null,
+            'featured_image' => $featuredImage,
             'status' => $validated['status'],
             'published_at' => $validated['published_at'] ?? ($validated['status'] === 'published' ? now() : null),
         ]);
@@ -138,11 +149,29 @@ class PostController extends Controller
             'excerpt' => ['required', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'category_id' => ['required', 'exists:categories,id'],
-            'featured_image' => ['nullable', 'url', 'max:500'],
+            'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
             'status' => ['required', 'in:draft,published'],
             'published_at' => ['nullable', 'date'],
             'tags' => ['nullable', 'array'],
         ]);
+
+        $featuredImage = $post->featured_image;
+
+        // Processar upload de imagem se houver
+        if ($request->hasFile('featured_image_file')) {
+            // Deletar imagem antiga se existir e for do nosso storage
+            if ($post->featured_image && str_contains($post->featured_image, '/storage/posts/featured/')) {
+                $oldPath = str_replace(Storage::disk('public')->url(''), '', $post->featured_image);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+            
+            $file = $request->file('featured_image_file');
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('posts/featured', $filename, 'public');
+            $featuredImage = Storage::disk('public')->url($path);
+        }
 
         $post->update([
             'title' => $validated['title'],
@@ -150,7 +179,7 @@ class PostController extends Controller
             'excerpt' => $validated['excerpt'],
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
-            'featured_image' => $validated['featured_image'] ?? null,
+            'featured_image' => $featuredImage,
             'status' => $validated['status'],
             'published_at' => $validated['published_at'] ?? ($validated['status'] === 'published' && !$post->published_at ? now() : $post->published_at),
         ]);

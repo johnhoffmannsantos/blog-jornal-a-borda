@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             TeamSeeder::class,
             BlogSeeder::class,
+            PartnerSeeder::class,
+            JournalEditionSeeder::class,
         ]);
     }
 }

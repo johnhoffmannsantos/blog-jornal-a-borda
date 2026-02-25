@@ -19,6 +19,10 @@ class SettingsController extends Controller
 
         $siteSettings = Setting::getByGroup('site');
         $smtpSettings = Setting::getByGroup('smtp');
+        $socialSettings = Setting::getByGroup('social');
+
+        // Mesclar configurações sociais com site para compatibilidade
+        $siteSettings = array_merge($siteSettings, $socialSettings);
 
         return view('admin.settings.index', compact('siteSettings', 'smtpSettings'));
     }
@@ -35,6 +39,15 @@ class SettingsController extends Controller
             'site_description' => ['required', 'string', 'max:500'],
             'site_email' => ['required', 'email', 'max:255'],
             'site_logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,svg', 'max:2048'],
+            
+            // Social Media Settings
+            'social_instagram' => ['nullable', 'url', 'max:255'],
+            'social_facebook' => ['nullable', 'url', 'max:255'],
+            'social_linkedin' => ['nullable', 'url', 'max:255'],
+            'social_twitter' => ['nullable', 'url', 'max:255'],
+            'social_youtube' => ['nullable', 'url', 'max:255'],
+            'social_tiktok' => ['nullable', 'url', 'max:255'],
+            'contact_whatsapp' => ['nullable', 'string', 'max:50'],
             
             // SMTP Settings
             'mail_mailer' => ['required', 'string', 'in:smtp,sendmail,log'],
@@ -66,6 +79,15 @@ class SettingsController extends Controller
         if ($logoPath) {
             Setting::set('site_logo', $logoPath, 'text', 'site', 'Logo do site');
         }
+
+        // Atualizar configurações de Redes Sociais
+        Setting::set('social_instagram', $validated['social_instagram'] ?? '', 'url', 'social', 'Link do Instagram');
+        Setting::set('social_facebook', $validated['social_facebook'] ?? '', 'url', 'social', 'Link do Facebook');
+        Setting::set('social_linkedin', $validated['social_linkedin'] ?? '', 'url', 'social', 'Link do LinkedIn');
+        Setting::set('social_twitter', $validated['social_twitter'] ?? '', 'url', 'social', 'Link do Twitter/X');
+        Setting::set('social_youtube', $validated['social_youtube'] ?? '', 'url', 'social', 'Link do YouTube');
+        Setting::set('social_tiktok', $validated['social_tiktok'] ?? '', 'url', 'social', 'Link do TikTok');
+        Setting::set('contact_whatsapp', $validated['contact_whatsapp'] ?? '', 'text', 'social', 'Número do WhatsApp');
 
         // Atualizar configurações SMTP
         Setting::set('mail_mailer', $validated['mail_mailer'], 'text', 'smtp', 'Driver de email');

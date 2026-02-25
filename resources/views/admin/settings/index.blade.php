@@ -22,6 +22,12 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="social-tab" data-bs-toggle="tab" data-bs-target="#social" 
+                    type="button" role="tab" aria-controls="social" aria-selected="false">
+                <i class="bi bi-share me-2"></i>Redes Sociais
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="smtp-tab" data-bs-toggle="tab" data-bs-target="#smtp" 
                     type="button" role="tab" aria-controls="smtp" aria-selected="false">
                 <i class="bi bi-envelope me-2"></i>Configurações SMTP
@@ -88,7 +94,109 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Configurações SMTP -->
+            <!-- Tab 2: Redes Sociais -->
+            <div class="tab-pane fade" id="social" role="tabpanel" aria-labelledby="social-tab">
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Informação:</strong> Configure os links das redes sociais. Apenas as redes com links configurados aparecerão no site.
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="social_instagram" class="form-label fw-semibold">
+                            <i class="bi bi-instagram me-2 text-danger"></i>Instagram
+                        </label>
+                        <input type="url" class="form-control @error('social_instagram') is-invalid @enderror" 
+                               id="social_instagram" name="social_instagram" 
+                               value="{{ old('social_instagram', $siteSettings['social_instagram'] ?? '') }}" 
+                               placeholder="https://instagram.com/seu_perfil">
+                        @error('social_instagram')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="social_facebook" class="form-label fw-semibold">
+                            <i class="bi bi-facebook me-2 text-primary"></i>Facebook
+                        </label>
+                        <input type="url" class="form-control @error('social_facebook') is-invalid @enderror" 
+                               id="social_facebook" name="social_facebook" 
+                               value="{{ old('social_facebook', $siteSettings['social_facebook'] ?? '') }}" 
+                               placeholder="https://facebook.com/seu_perfil">
+                        @error('social_facebook')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="social_linkedin" class="form-label fw-semibold">
+                            <i class="bi bi-linkedin me-2 text-primary"></i>LinkedIn
+                        </label>
+                        <input type="url" class="form-control @error('social_linkedin') is-invalid @enderror" 
+                               id="social_linkedin" name="social_linkedin" 
+                               value="{{ old('social_linkedin', $siteSettings['social_linkedin'] ?? '') }}" 
+                               placeholder="https://linkedin.com/in/seu_perfil">
+                        @error('social_linkedin')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="social_twitter" class="form-label fw-semibold">
+                            <i class="bi bi-twitter-x me-2"></i>Twitter/X
+                        </label>
+                        <input type="url" class="form-control @error('social_twitter') is-invalid @enderror" 
+                               id="social_twitter" name="social_twitter" 
+                               value="{{ old('social_twitter', $siteSettings['social_twitter'] ?? '') }}" 
+                               placeholder="https://twitter.com/seu_perfil">
+                        @error('social_twitter')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="social_youtube" class="form-label fw-semibold">
+                            <i class="bi bi-youtube me-2 text-danger"></i>YouTube
+                        </label>
+                        <input type="url" class="form-control @error('social_youtube') is-invalid @enderror" 
+                               id="social_youtube" name="social_youtube" 
+                               value="{{ old('social_youtube', $siteSettings['social_youtube'] ?? '') }}" 
+                               placeholder="https://youtube.com/@seu_canal">
+                        @error('social_youtube')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="social_tiktok" class="form-label fw-semibold">
+                            <i class="bi bi-tiktok me-2"></i>TikTok
+                        </label>
+                        <input type="url" class="form-control @error('social_tiktok') is-invalid @enderror" 
+                               id="social_tiktok" name="social_tiktok" 
+                               value="{{ old('social_tiktok', $siteSettings['social_tiktok'] ?? '') }}" 
+                               placeholder="https://tiktok.com/@seu_perfil">
+                        @error('social_tiktok')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="contact_whatsapp" class="form-label fw-semibold">
+                            <i class="bi bi-whatsapp me-2 text-success"></i>WhatsApp
+                        </label>
+                        <input type="text" class="form-control @error('contact_whatsapp') is-invalid @enderror" 
+                               id="contact_whatsapp" name="contact_whatsapp" 
+                               value="{{ old('contact_whatsapp', $siteSettings['contact_whatsapp'] ?? '') }}" 
+                               placeholder="(11) 99999-9999">
+                        <small class="text-muted">Número com DDD, será usado para link do WhatsApp</small>
+                        @error('contact_whatsapp')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Configurações SMTP -->
             <div class="tab-pane fade" id="smtp" role="tabpanel" aria-labelledby="smtp-tab">
                 <div class="alert alert-info mb-4">
                     <i class="bi bi-info-circle me-2"></i>
@@ -199,7 +307,7 @@
                         @csrf
                         <div class="col-md-8">
                             <input type="email" class="form-control" name="test_email" 
-                                   placeholder="Digite um email para testar o envio" required>
+                                   placeholder="Digite um email para testar o envio">
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-outline-primary w-100">
@@ -219,7 +327,7 @@
             <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-arrow-left me-2"></i>Voltar
             </a>
-            <button type="submit" id="saveSettingsBtn" class="btn btn-primary btn-lg">
+            <button type="submit" id="saveSettingsBtn" class="btn btn-primary btn-lg" onclick="return handleSettingsSubmit(event)">
                 <i class="bi bi-save me-2"></i>Salvar Todas as Configurações
             </button>
         </div>
@@ -228,94 +336,90 @@
 
 @push('scripts')
 <script>
-    (function() {
-        'use strict';
+    // Função global para garantir que esteja disponível
+    window.handleSettingsSubmit = function(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         
-        function initSettingsForm() {
-            const form = document.getElementById('settingsForm');
-            const saveBtn = document.getElementById('saveSettingsBtn');
-            
-            if (!form || !saveBtn) {
-                console.error('Elementos do formulário não encontrados');
-                return;
+        const form = document.getElementById('settingsForm');
+        const btn = document.getElementById('saveSettingsBtn');
+        
+        if (!form) {
+            alert('Erro: Formulário não encontrado!');
+            return false;
+        }
+        
+        if (!btn) {
+            alert('Erro: Botão não encontrado!');
+            return false;
+        }
+        
+        // Validar formulário
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return false;
+        }
+        
+        // Prevenir múltiplos submits
+        if (btn.disabled) {
+            return false;
+        }
+        
+        // Aplicar loading
+        btn.disabled = true;
+        btn.classList.add('loading');
+        
+        const icon = btn.querySelector('i');
+        if (icon) {
+            icon.style.display = 'none';
+        }
+        
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...';
+        
+        // Submeter formulário
+        setTimeout(function() {
+            form.submit();
+        }, 100);
+        
+        return false;
+    };
+    
+    // Listener adicional no formulário como backup
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('settingsForm');
+        const btn = document.getElementById('saveSettingsBtn');
+        
+        if (form && btn) {
+            // Remover onclick inline e adicionar listener programático
+            if (btn.hasAttribute('onclick')) {
+                btn.removeAttribute('onclick');
+                btn.addEventListener('click', window.handleSettingsSubmit);
             }
             
-            // Listener no botão de submit
-            saveBtn.addEventListener('click', function(e) {
-                e.preventDefault();
+            // Listener no submit do formulário
+            form.addEventListener('submit', function(e) {
+                if (btn.disabled) {
+                    return true; // Já está processando
+                }
                 
-                // Validar formulário
                 if (!form.checkValidity()) {
+                    e.preventDefault();
                     form.reportValidity();
                     return false;
                 }
                 
-                // Mostrar loading
-                saveBtn.disabled = true;
-                saveBtn.classList.add('loading');
+                btn.disabled = true;
+                btn.classList.add('loading');
+                const icon = btn.querySelector('i');
+                if (icon) icon.style.display = 'none';
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvando...';
                 
-                const icon = saveBtn.querySelector('i');
-                if (icon) {
-                    icon.style.display = 'none';
-                }
-                
-                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...';
-                
-                // Submeter formulário
-                form.submit();
-                
-                return false;
-            });
-            
-            // Listener no submit do formulário (backup)
-            form.addEventListener('submit', function(e) {
-                // Não prevenir se já foi tratado pelo botão
-                if (saveBtn.disabled) {
-                    return;
-                }
-                
-                // Mostrar loading
-                saveBtn.disabled = true;
-                saveBtn.classList.add('loading');
-                
-                const icon = saveBtn.querySelector('i');
-                if (icon) {
-                    icon.style.display = 'none';
-                }
-                
-                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...';
+                return true;
             });
         }
-        
-        function initTestEmailForm() {
-            const testEmailForm = document.getElementById('testEmailForm');
-            if (testEmailForm) {
-                testEmailForm.addEventListener('submit', function(e) {
-                    const submitBtn = testEmailForm.querySelector('button[type="submit"]');
-                    if (submitBtn && !submitBtn.disabled) {
-                        submitBtn.disabled = true;
-                        submitBtn.classList.add('loading');
-                        const icon = submitBtn.querySelector('i');
-                        if (icon) {
-                            icon.style.display = 'none';
-                        }
-                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando...';
-                    }
-                });
-            }
-        }
-        
-        // Inicializar quando DOM estiver pronto
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                initSettingsForm();
-                initTestEmailForm();
-            });
-        } else {
-            initSettingsForm();
-            initTestEmailForm();
-        }
-    })();
+    });
 </script>
 @endpush
 

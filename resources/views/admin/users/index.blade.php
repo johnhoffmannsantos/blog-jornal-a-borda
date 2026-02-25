@@ -10,6 +10,9 @@
         </h1>
         <p>Gerencie os usuários do sistema</p>
     </div>
+    <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Novo Usuário
+    </a>
 </div>
 
 {{-- Mensagens serão exibidas via Toast --}}

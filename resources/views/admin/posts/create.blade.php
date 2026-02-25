@@ -15,7 +15,7 @@
     </a>
 </div>
 
-<form method="POST" action="{{ route('admin.posts.store') }}" id="postForm">
+<form method="POST" action="{{ route('admin.posts.store') }}" id="postForm" enctype="multipart/form-data">
     @csrf
 
     <div class="row">
@@ -153,11 +153,11 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="featured_image" class="form-label fw-semibold">URL da Imagem</label>
-                    <input type="url" class="form-control @error('featured_image') is-invalid @enderror" 
-                           id="featured_image" name="featured_image" value="{{ old('featured_image') }}" 
-                           placeholder="https://exemplo.com/imagem.jpg">
-                    @error('featured_image')
+                    <label for="featured_image_file" class="form-label fw-semibold">Upload de Imagem</label>
+                    <input type="file" class="form-control @error('featured_image_file') is-invalid @enderror" 
+                           id="featured_image_file" name="featured_image_file" accept="image/*">
+                    <small class="text-muted">Formatos aceitos: JPEG, PNG, GIF, WebP. Tamanho máximo: 5MB</small>
+                    @error('featured_image_file')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -259,11 +259,58 @@
         toolbar: 'undo redo | blocks | ' +
             'bold italic forecolor | alignleft aligncenter ' +
             'alignright alignjustify | bullist numlist outdent indent | ' +
-            'removeformat | help',
+            'image link | removeformat | help',
         content_style: 'body { font-family: Inter, Arial, sans-serif; font-size: 16px; }',
         branding: false,
         promotion: false,
         license_key: 'gpl',
+        images_upload_url: '{{ route('admin.upload.image') }}',
+        images_upload_handler: function (blobInfo, progress) {
+            return new Promise(function (resolve, reject) {
+                const xhr = new XMLHttpRequest();
+                xhr.withCredentials = false;
+                xhr.open('POST', '{{ route('admin.upload.image') }}');
+                
+                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (token) {
+                    xhr.setRequestHeader('X-CSRF-TOKEN', token);
+                }
+                
+                xhr.upload.onprogress = function (e) {
+                    progress(e.loaded / e.total * 100);
+                };
+                
+                xhr.onload = function () {
+                    if (xhr.status === 403) {
+                        reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
+                        return;
+                    }
+                    
+                    if (xhr.status < 200 || xhr.status >= 300) {
+                        reject('HTTP Error: ' + xhr.status);
+                        return;
+                    }
+                    
+                    const json = JSON.parse(xhr.responseText);
+                    
+                    if (!json || typeof json.location != 'string') {
+                        reject('Invalid JSON: ' + xhr.responseText);
+                        return;
+                    }
+                    
+                    resolve(json.location);
+                };
+                
+                xhr.onerror = function () {
+                    reject('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
+                };
+                
+                const formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+                
+                xhr.send(formData);
+            });
+        },
         setup: function(editor) {
             editor.on('keyup', function() {
                 const content = editor.getContent({ format: 'text' });
@@ -287,19 +334,26 @@
         }
     });
 
-    // Preview de imagem
-    document.getElementById('featured_image').addEventListener('input', function() {
-        const url = this.value;
-        const preview = document.getElementById('image-preview');
-        const img = document.getElementById('preview-img');
-        
-        if (url && url.startsWith('http')) {
-            img.src = url;
-            preview.style.display = 'block';
-        } else {
-            preview.style.display = 'none';
-        }
-    });
+    // Preview de imagem (upload)
+    const featuredImageFile = document.getElementById('featured_image_file');
+    if (featuredImageFile) {
+        featuredImageFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('image-preview');
+            const img = document.getElementById('preview-img');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
 
     // Auto-save draft (opcional - pode ser implementado no futuro)
     // setInterval(() => {

@@ -42,6 +42,41 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+    public function create()
+    {
+        $this->checkAdmin();
+        
+        return view('admin.users.create');
+    }
+
+    public function store(Request $request)
+    {
+        $this->checkAdmin();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', 'string', 'in:admin,editor,author,reviewer,social_media,communication,designer'],
+            'position' => ['nullable', 'string', 'max:255'],
+            'bio' => ['nullable', 'string', 'max:500'],
+            'avatar' => ['nullable', 'url', 'max:500'],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'position' => $validated['position'] ?? null,
+            'bio' => $validated['bio'] ?? null,
+            'avatar' => $validated['avatar'] ?? null,
+        ]);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Usuário '{$user->name}' criado com sucesso!");
+    }
+
     public function edit(User $user)
     {
         $this->checkAdmin();

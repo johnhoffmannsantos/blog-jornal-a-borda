@@ -15,6 +15,10 @@ use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ImageUploadController;
+use App\Http\Controllers\Admin\PartnerController;
+use App\Http\Controllers\Admin\JournalEditionController as AdminJournalEditionController;
+use App\Http\Controllers\JournalEditionController;
 use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +29,9 @@ Route::get('/nossa-equipe', [TeamController::class, 'index'])->name('team');
 Route::get('/autor/{id}', [AuthorController::class, 'show'])->name('author.show');
 Route::get('/categoria/{slug}', [CategoryController::class, 'show'])->name('category.show');
 Route::get('/tag/{slug}', [PublicTagController::class, 'show'])->name('tag.show');
+Route::get('/jornal-digital', [JournalEditionController::class, 'index'])->name('journal-editions.index');
+Route::get('/jornal-digital/{slug}', [JournalEditionController::class, 'show'])->name('journal-editions.show');
+Route::get('/jornal-digital/{slug}/download', [JournalEditionController::class, 'download'])->name('journal-editions.download');
 
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -56,7 +63,16 @@ Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     Route::delete('/tags/{tag}/force', [TagController::class, 'forceDestroy'])->name('tags.forceDestroy');
     
     // Users (Admin only)
-    Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
+    Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    
+    // Image Upload (TinyMCE)
+    Route::post('/upload-image', [ImageUploadController::class, 'upload'])->name('upload.image');
+    
+    // Partners (Admin only)
+    Route::resource('partners', PartnerController::class);
+    
+    // Journal Editions (Admin only)
+    Route::resource('journal-editions', AdminJournalEditionController::class);
     
     // Comments
     Route::get('/comentarios', [CommentController::class, 'index'])->name('comments.index');

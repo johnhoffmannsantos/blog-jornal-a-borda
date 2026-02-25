@@ -95,6 +95,7 @@
                     <th>Autor</th>
                     <th>Status</th>
                     <th>Data</th>
+                    <th>Visualizações</th>
                     <th style="width: 120px;">Ações</th>
                 </tr>
             </thead>
@@ -125,6 +126,11 @@
                         <small>{{ $post->published_at ? $post->published_at->format('d/m/Y') : '-' }}</small>
                     </td>
                     <td>
+                        <span class="badge bg-info">
+                            <i class="bi bi-eye me-1"></i>{{ $post->views ?? 0 }}
+                        </span>
+                    </td>
+                    <td>
                         <div class="btn-group btn-group-sm">
                             <a href="{{ route('admin.posts.edit', $post) }}" class="btn btn-outline-primary" title="Editar">
                                 <i class="bi bi-pencil"></i>
@@ -142,7 +148,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-5 text-muted">
+                    <td colspan="8" class="text-center py-5 text-muted">
                         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                         Nenhum post encontrado.
                     </td>

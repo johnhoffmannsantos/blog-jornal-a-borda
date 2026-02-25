@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Painel Administrativo - Jornal a Borda')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -332,6 +333,14 @@
             <a class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
                 <i class="bi bi-people"></i>
                 <span>Usuários</span>
+            </a>
+            <a class="nav-link {{ request()->routeIs('admin.partners*') ? 'active' : '' }}" href="{{ route('admin.partners.index') }}">
+                <i class="bi bi-building"></i>
+                <span>Parceiros</span>
+            </a>
+            <a class="nav-link {{ request()->routeIs('admin.journal-editions*') ? 'active' : '' }}" href="{{ route('admin.journal-editions.index') }}">
+                <i class="bi bi-journal-text"></i>
+                <span>Jornal Digital</span>
             </a>
             <a class="nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
                 <i class="bi bi-gear"></i>

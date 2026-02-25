@@ -110,21 +110,7 @@
 
         <!-- Sidebar -->
         <div class="col-lg-4 col-md-12 mt-5 mt-lg-0">
-            <div class="sidebar">
-                <h4>
-                    <i class="bi bi-tags me-2"></i>Categorias
-                </h4>
-                <ul class="list-unstyled">
-                    @foreach($categories as $category)
-                    <li>
-                        <a href="{{ route('category.show', $category->slug) }}">
-                            <span>{{ $category->name }}</span>
-                            <span class="badge">{{ $category->posts_count }}</span>
-                        </a>
-                    </li>
-                    @endforeach
-                </ul>
-            </div>
+            @include('partials.sidebar')
         </div>
     </div>
 </div>

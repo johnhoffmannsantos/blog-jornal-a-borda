@@ -390,6 +390,43 @@
             opacity: 0.9;
         }
 
+        /* Partners Section */
+        .partners-section {
+            margin-top: 60px;
+        }
+
+        .partner-item {
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .partner-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .partner-link {
+            display: block;
+            width: 100%;
+            text-decoration: none;
+        }
+
+        .partner-link:hover .partner-logo {
+            filter: grayscale(0) !important;
+            transform: scale(1.05);
+        }
+
+        .partner-logo {
+            transition: var(--transition);
+        }
+
         /* Author Box */
         .author-box {
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
@@ -603,7 +640,7 @@
                         @php
                             $logo = \App\Models\Setting::get('site_logo');
                         @endphp
-                        @if($logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($logo))
+                        @if($logo)
                             <img src="{{ \Illuminate\Support\Facades\Storage::url($logo) }}" alt="{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}" style="max-height: 60px; max-width: 300px;">
                         @else
                             <h2>{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}</h2>
@@ -648,6 +685,11 @@
                                 <i class="bi bi-people me-1"></i>Nossa Equipe
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('journal-editions*') ? 'active' : '' }}" href="{{ route('journal-editions.index') }}">
+                                <i class="bi bi-journal-text me-1"></i>Jornal Digital
+                            </a>
+                        </li>
                         @auth
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('admin.dashboard') }}">
@@ -686,6 +728,162 @@
     <main id="main-content" class="blog main-container py-4">
         @yield('content')
     </main>
+
+    <!-- Partners Section -->
+    @php
+        $partners = \App\Models\Partner::where('is_active', true)
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
+    @endphp
+    @if($partners->count() > 0)
+    <section class="partners-section py-5" style="background: #f8f9fa; border-top: 1px solid var(--border-color);">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h3 class="mb-2">Nossos Parceiros</h3>
+                    <p class="text-muted">Empresas e organizações que apoiam nosso trabalho</p>
+                </div>
+            </div>
+            
+            @if($partners->count() > 6)
+            <!-- Carrossel para muitos parceiros -->
+            <div id="partnersCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+                <div class="carousel-inner">
+                    @foreach($partners->chunk(6) as $chunkIndex => $chunk)
+                    <div class="carousel-item {{ $chunkIndex === 0 ? 'active' : '' }}">
+                        <div class="row g-4">
+                            @foreach($chunk as $partner)
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="partner-item text-center">
+                                    @if($partner->website_url)
+                                    <a href="{{ $partner->website_url }}" target="_blank" rel="noopener noreferrer" class="partner-link">
+                                    @endif
+                                        @if($partner->logo)
+                                        <img src="{{ $partner->logo }}" alt="{{ $partner->name }}" 
+                                             class="partner-logo img-fluid" 
+                                             style="max-height: 80px; max-width: 100%; object-fit: contain; filter: grayscale(0.3); transition: var(--transition);">
+                                        @else
+                                        <div class="partner-placeholder" style="height: 80px; display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 8px;">
+                                            <span class="text-muted">{{ $partner->name }}</span>
+                                        </div>
+                                        @endif
+                                    @if($partner->website_url)
+                                    </a>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#partnersCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#partnersCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Próximo</span>
+                </button>
+            </div>
+            @else
+            <!-- Grid simples para poucos parceiros -->
+            <div class="row g-4">
+                @foreach($partners as $partner)
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="partner-item text-center">
+                        @if($partner->website_url)
+                        <a href="{{ $partner->website_url }}" target="_blank" rel="noopener noreferrer" class="partner-link">
+                        @endif
+                            @if($partner->logo)
+                            <img src="{{ $partner->logo }}" alt="{{ $partner->name }}" 
+                                 class="partner-logo img-fluid" 
+                                 style="max-height: 80px; max-width: 100%; object-fit: contain; filter: grayscale(0.3); transition: var(--transition);">
+                            @else
+                            <div class="partner-placeholder" style="height: 80px; display: flex; align-items: center; justify-content: center; background: #e9ecef; border-radius: 8px;">
+                                <span class="text-muted">{{ $partner->name }}</span>
+                            </div>
+                            @endif
+                        @if($partner->website_url)
+                        </a>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#advertiseModal">
+                        <i class="bi bi-megaphone me-2"></i>Anuncie aqui / Colabore com essa causa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    @else
+    <!-- Se não houver parceiros, mostrar apenas o botão -->
+    <section class="partners-section py-5" style="background: #f8f9fa; border-top: 1px solid var(--border-color);">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#advertiseModal">
+                        <i class="bi bi-megaphone me-2"></i>Anuncie aqui / Colabore com essa causa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
+
+    <!-- Modal Anuncie Aqui -->
+    <div class="modal fade" id="advertiseModal" tabindex="-1" aria-labelledby="advertiseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="advertiseModalLabel">
+                        <i class="bi bi-megaphone me-2"></i>Anuncie aqui / Colabore com essa causa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Entre em contato conosco para se tornar um parceiro ou anunciar em nosso site:</p>
+                    <div class="contact-info">
+                        @php
+                            $contactEmail = \App\Models\Setting::get('contact_email', 'contato@jornalaborda.com.br');
+                            $contactPhone = \App\Models\Setting::get('contact_phone', '');
+                            $contactWhatsApp = \App\Models\Setting::get('contact_whatsapp', '');
+                        @endphp
+                        @if($contactEmail)
+                        <div class="mb-3">
+                            <strong><i class="bi bi-envelope me-2"></i>E-mail:</strong><br>
+                            <a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a>
+                        </div>
+                        @endif
+                        @if($contactPhone)
+                        <div class="mb-3">
+                            <strong><i class="bi bi-telephone me-2"></i>Telefone:</strong><br>
+                            <a href="tel:{{ $contactPhone }}">{{ $contactPhone }}</a>
+                        </div>
+                        @endif
+                        @if($contactWhatsApp)
+                        <div class="mb-3">
+                            <strong><i class="bi bi-whatsapp me-2"></i>WhatsApp:</strong><br>
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $contactWhatsApp) }}" target="_blank" rel="noopener noreferrer">
+                                {{ $contactWhatsApp }}
+                            </a>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="copy-right">

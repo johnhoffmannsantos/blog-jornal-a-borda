@@ -11,7 +11,7 @@
 @section('content')
 <div class="container">
     <div class="row">
-        <div class="col-lg-8 col-md-12 mx-auto">
+        <div class="col-lg-8 col-md-12">
             <article class="post-single">
                 <!-- Header -->
                 <header class="entry-header mb-4">
@@ -133,6 +133,11 @@
                     </form>
                 </div>
             </article>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4 col-md-12 mt-5 mt-lg-0">
+            @include('partials.sidebar')
         </div>
     </div>
 </div>
