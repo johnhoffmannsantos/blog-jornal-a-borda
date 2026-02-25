@@ -36,14 +36,32 @@ class JournalEdition extends Model
         parent::boot();
 
         static::creating(function ($journalEdition) {
+            // O slug será gerado no controller para garantir unicidade
+            // Este método só será usado como fallback
             if (empty($journalEdition->slug)) {
-                $journalEdition->slug = Str::slug($journalEdition->title);
+                $baseSlug = Str::slug($journalEdition->title);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = $baseSlug . '-' . $counter;
+                    $counter++;
+                }
+                $journalEdition->slug = $slug;
             }
         });
 
         static::updating(function ($journalEdition) {
+            // O slug será gerado no controller se o título mudar
+            // Este método só será usado como fallback
             if ($journalEdition->isDirty('title') && empty($journalEdition->slug)) {
-                $journalEdition->slug = Str::slug($journalEdition->title);
+                $baseSlug = Str::slug($journalEdition->title);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (static::where('slug', $slug)->where('id', '!=', $journalEdition->id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter;
+                    $counter++;
+                }
+                $journalEdition->slug = $slug;
             }
         });
     }

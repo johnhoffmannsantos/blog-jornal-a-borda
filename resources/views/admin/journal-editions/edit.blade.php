@@ -12,6 +12,18 @@
     </div>
 </div>
 
+@if($errors->any())
+<div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <h5><i class="bi bi-exclamation-triangle me-2"></i>Erro ao atualizar edição</h5>
+    <ul class="mb-0">
+        @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <form action="{{ route('admin.journal-editions.update', $journalEdition) }}" method="POST" enctype="multipart/form-data" id="journalEditionForm">
     @csrf
     @method('PUT')
@@ -169,20 +181,77 @@
 @push('scripts')
 <script>
     // Preview da capa
-    document.getElementById('cover_image').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const preview = document.getElementById('cover-preview');
-        const img = document.getElementById('preview-img');
+    const coverImageInput = document.getElementById('cover_image');
+    if (coverImageInput) {
+        coverImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('cover-preview');
+            const img = document.getElementById('preview-img');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
+
+    // Validação e submissão do formulário
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('journalEditionForm');
+        const submitButton = form ? form.querySelector('button[type="submit"]') : null;
         
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                img.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.style.display = 'none';
+        if (form && submitButton) {
+            form.addEventListener('submit', function(e) {
+                // Validar formulário HTML5
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.reportValidity();
+                    return false;
+                }
+                
+                // Validar tamanho do PDF se houver novo arquivo
+                const pdfInput = document.getElementById('pdf_file');
+                if (pdfInput && pdfInput.files.length > 0) {
+                    const file = pdfInput.files[0];
+                    const maxSize = 10 * 1024 * 1024; // 10MB
+                    
+                    if (file.size > maxSize) {
+                        e.preventDefault();
+                        alert('O arquivo PDF é muito grande. Tamanho máximo: 10MB');
+                        return false;
+                    }
+                    
+                    // Verificar se é PDF
+                    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                        e.preventDefault();
+                        alert('Por favor, selecione um arquivo PDF válido.');
+                        return false;
+                    }
+                }
+                
+                // Marcar formulário como validado para evitar conflito com script global
+                form.dataset.validated = 'true';
+                
+                // Aplicar loading state
+                if (!submitButton.disabled) {
+                    submitButton.disabled = true;
+                    const icon = submitButton.querySelector('i');
+                    if (icon) {
+                        icon.style.display = 'none';
+                    }
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...';
+                }
+                
+                // Permitir submissão normal
+                return true;
+            });
         }
     });
 </script>

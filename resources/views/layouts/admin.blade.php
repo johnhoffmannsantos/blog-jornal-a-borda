@@ -385,11 +385,21 @@
             const forms = document.querySelectorAll('form');
             
             forms.forEach(function(form) {
+                // Pular formulários que já têm validação customizada
+                if (form.id === 'journalEditionForm' || form.id === 'settingsForm' || form.id === 'avatarForm') {
+                    return;
+                }
+                
                 form.addEventListener('submit', function(e) {
+                    // Não interferir se o formulário já foi validado e está sendo submetido
+                    if (form.dataset.validated === 'true') {
+                        return;
+                    }
+                    
                     const submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
                     
                     submitButtons.forEach(function(button) {
-                        if (!button.classList.contains('loading')) {
+                        if (!button.disabled && !button.classList.contains('loading')) {
                             button.classList.add('loading');
                             button.disabled = true;
                             
