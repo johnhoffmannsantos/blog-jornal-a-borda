@@ -72,18 +72,69 @@ Abra seu navegador em: `http://localhost:3098`
 
 ### Opção 2: Sem Docker (Instalação Local)
 
-#### 1. Clone o repositório
+#### Método A: Script Automatizado (Recomendado)
+
+1. Clone o repositório:
 ```bash
 git clone <url-do-repositorio>
 cd jornal-a-borda
 ```
 
-#### 2. Instale as dependências do PHP
+2. Configure o arquivo `.env`:
+```bash
+cp .env.example .env
+```
+
+Edite o arquivo `.env` e configure suas credenciais do banco de dados:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=jornal_db
+DB_USERNAME=seu_usuario
+DB_PASSWORD=sua_senha
+
+APP_URL=http://localhost:8000
+```
+
+3. Execute o script de instalação:
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+O script irá:
+- Verificar dependências (PHP, Composer)
+- Instalar dependências do Composer
+- Gerar chave da aplicação
+- Verificar conexão com banco de dados
+- Executar migrations
+- Executar seeders
+- Criar link simbólico para storage
+- Ajustar permissões
+- Limpar caches
+
+4. Inicie o servidor:
+```bash
+php artisan serve
+```
+
+Acesse: `http://localhost:8000`
+
+#### Método B: Instalação Manual
+
+1. Clone o repositório:
+```bash
+git clone <url-do-repositorio>
+cd jornal-a-borda
+```
+
+2. Instale as dependências do PHP:
 ```bash
 composer install
 ```
 
-#### 3. Configure o ambiente
+3. Configure o ambiente:
 ```bash
 cp .env.example .env
 ```
@@ -100,28 +151,38 @@ DB_PASSWORD=sua_senha
 APP_URL=http://localhost:8000
 ```
 
-#### 4. Gere a chave da aplicação
+4. Gere a chave da aplicação:
 ```bash
 php artisan key:generate
 ```
 
-#### 5. Configure o banco de dados
+5. Configure o banco de dados:
 Crie o banco de dados MySQL:
 ```sql
 CREATE DATABASE jornal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-#### 6. Execute as migrations e seeders
+6. Execute as migrations e seeders:
 ```bash
 php artisan migrate:fresh --seed
 ```
 
-#### 7. Crie o link simbólico para storage
+7. Crie o link simbólico para storage:
 ```bash
 php artisan storage:link
 ```
 
-#### 8. Inicie o servidor de desenvolvimento
+8. Ajuste as permissões:
+```bash
+chmod -R 775 storage bootstrap/cache
+```
+
+9. Limpe os caches:
+```bash
+php artisan optimize:clear
+```
+
+10. Inicie o servidor de desenvolvimento:
 ```bash
 php artisan serve
 ```
@@ -326,7 +387,8 @@ jornal-a-borda/
 │   └── web.php                 # Rotas da aplicação
 ├── docker-compose.yml          # Configuração Docker
 ├── Dockerfile                  # Imagem Docker do Laravel
-└── Makefile                    # Comandos úteis
+├── Makefile                    # Comandos úteis
+└── install.sh                  # Script de instalação (sem Docker)
 ```
 
 ## 🔧 Configuração do Docker
