@@ -83,13 +83,29 @@ class PartnerController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:500'],
+            'description' => ['nullable', 'string'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,svg,webp', 'max:2048'],
             'website_url' => ['nullable', 'url', 'max:500'],
             'level' => ['required', 'string', 'in:gold,silver,bronze'],
             'order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
+        ], [
+            'name.required' => 'O nome do parceiro é obrigatório.',
+            'name.max' => 'O nome não pode ter mais de 255 caracteres.',
+            'logo.image' => 'O arquivo deve ser uma imagem.',
+            'logo.mimes' => 'A imagem deve ser JPEG, PNG, GIF, SVG ou WebP.',
+            'logo.max' => 'A imagem não pode ter mais de 2MB.',
+            'website_url.url' => 'A URL do site deve ser válida.',
+            'level.required' => 'O nível do parceiro é obrigatório.',
+            'level.in' => 'O nível deve ser Ouro, Prata ou Bronze.',
+            'order.integer' => 'A ordem deve ser um número inteiro.',
+            'order.min' => 'A ordem não pode ser negativa.',
         ]);
+
+        // Limpar website_url se estiver vazio
+        if (empty($validated['website_url'])) {
+            $validated['website_url'] = null;
+        }
 
         $logoPath = $partner->logo;
 
@@ -109,7 +125,7 @@ class PartnerController extends Controller
             $logoPath = Storage::disk('public')->url($path);
         }
 
-        $partner->update([
+        $updateData = [
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'logo' => $logoPath,
@@ -117,7 +133,9 @@ class PartnerController extends Controller
             'level' => $validated['level'],
             'order' => $validated['order'] ?? 0,
             'is_active' => $request->has('is_active'),
-        ]);
+        ];
+
+        $partner->update($updateData);
 
         return redirect()->route('admin.partners.index')
             ->with('success', 'Parceiro atualizado com sucesso!');

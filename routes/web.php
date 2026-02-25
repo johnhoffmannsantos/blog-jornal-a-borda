@@ -85,5 +85,8 @@ Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     Route::post('/configuracoes/test-email', [SettingsController::class, 'testEmail'])->name('settings.testEmail');
 });
 
+// Post Comment Route (must be before catch-all post route)
+Route::post('/{slug}/comentario', [PostController::class, 'storeComment'])->name('post.comment.store');
+
 // Post Route (must be last)
 Route::get('/{slug}', [PostController::class, 'show'])->name('post.show');

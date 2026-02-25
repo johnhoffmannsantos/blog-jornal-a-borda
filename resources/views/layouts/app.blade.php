@@ -59,6 +59,39 @@
             box-shadow: var(--shadow-sm);
         }
 
+        @media (max-width: 991px) {
+            .logo-area {
+                padding: 15px 0;
+            }
+
+            .logo-area .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .logo h2 {
+                font-size: 1.5rem;
+            }
+
+            .logo img {
+                max-height: 50px !important;
+                max-width: 200px !important;
+            }
+
+            .header-nav {
+                padding: 0;
+            }
+
+            .header-nav .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .navbar {
+                padding: 10px 0;
+            }
+        }
+
         .logo h2 {
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
@@ -581,6 +614,26 @@
         }
 
         /* Responsive */
+        @media (max-width: 991px) {
+            .header-nav .navbar {
+                flex-wrap: nowrap;
+            }
+
+            .header-nav .navbar-toggler {
+                border: none;
+                padding: 8px;
+                margin-left: auto;
+            }
+
+            .header-nav .navbar-toggler:focus {
+                box-shadow: none;
+            }
+
+            .header-nav .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        }
+
         @media (max-width: 768px) {
             .post-single .post-title {
                 font-size: 2rem;
@@ -631,8 +684,8 @@
         </div>
     </div>
 
-    <!-- Logo Area -->
-    <div class="logo-area">
+    <!-- Logo Area & Navigation -->
+    <div class="logo-area d-md-block d-none">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
@@ -655,7 +708,20 @@
     <header class="header-nav">
         <div class="container">
             <nav class="navbar navbar-expand-lg">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Logo Mobile (dentro do nav) -->
+                <div class="d-md-none d-flex align-items-center me-auto">
+                    <a href="{{ route('home') }}" class="logo me-3">
+                        @php
+                            $logo = \App\Models\Setting::get('site_logo');
+                        @endphp
+                        @if($logo)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($logo) }}" alt="{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}" style="max-height: 45px; max-width: 180px;">
+                        @else
+                            <h2 style="font-size: 1.3rem; margin: 0;">{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}</h2>
+                        @endif
+                    </a>
+                </div>
+                <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">

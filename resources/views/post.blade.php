@@ -110,22 +110,109 @@
                 <!-- Comments Section -->
                 <div id="comments" class="mt-5">
                     <h3 class="mb-4">
-                        <i class="bi bi-chat-dots me-2"></i>Deixe um comentário
+                        <i class="bi bi-chat-dots me-2"></i>Comentários
+                        @if($post->comments->count() > 0)
+                            <span class="badge bg-primary ms-2">{{ $post->comments->count() }}</span>
+                        @endif
                     </h3>
-                    <form action="#" method="post" class="comment-form">
+
+                    <!-- Lista de Comentários Aprovados -->
+                    @if($post->comments->count() > 0)
+                    <div class="comments-list mb-5">
+                        @foreach($post->comments as $comment)
+                        <div class="comment-item mb-4 pb-4 border-bottom">
+                            <div class="d-flex align-items-start">
+                                <div class="comment-avatar me-3">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($comment->author_name) }}&size=48&background=e63946&color=fff" 
+                                         alt="{{ $comment->author_name }}" class="rounded-circle">
+                                </div>
+                                <div class="comment-content flex-grow-1">
+                                    <div class="comment-header mb-2">
+                                        <strong class="comment-author">{{ $comment->author_name }}</strong>
+                                        @if($comment->author_url)
+                                        <a href="{{ $comment->author_url }}" target="_blank" rel="nofollow" class="text-decoration-none ms-2">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </a>
+                                        @endif
+                                        <small class="text-muted ms-2">
+                                            <i class="bi bi-clock"></i> {{ $comment->created_at->format('d/m/Y \à\s H:i') }}
+                                        </small>
+                                    </div>
+                                    <div class="comment-text">
+                                        {!! nl2br(e($comment->content)) !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @else
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle me-2"></i>Seja o primeiro a comentar!
+                    </div>
+                    @endif
+
+                    <h4 class="mb-4 mt-5">
+                        <i class="bi bi-pencil me-2"></i>Deixe um comentário
+                    </h4>
+                    
+                    @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    @endif
+
+                    @if($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    @endif
+
+                    <form action="{{ route('post.comment.store', $post->slug) }}" method="POST" class="comment-form">
+                        @csrf
                         <div class="row mb-3">
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="form-label fw-semibold">Nome *</label>
-                                <input type="text" class="form-control" placeholder="Seu nome" name="author_name" required>
+                                <input type="text" class="form-control @error('author_name') is-invalid @enderror" 
+                                       placeholder="Seu nome" name="author_name" 
+                                       value="{{ old('author_name') }}" required>
+                                @error('author_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Email *</label>
-                                <input type="email" class="form-control" placeholder="seu@email.com" name="author_email" required>
+                                <input type="email" class="form-control @error('author_email') is-invalid @enderror" 
+                                       placeholder="seu@email.com" name="author_email" 
+                                       value="{{ old('author_email') }}" required>
+                                @error('author_email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label fw-semibold">Website (opcional)</label>
+                            <input type="url" class="form-control @error('author_url') is-invalid @enderror" 
+                                   placeholder="https://seu-site.com" name="author_url" 
+                                   value="{{ old('author_url') }}">
+                            @error('author_url')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label fw-semibold">Comentário *</label>
-                            <textarea class="form-control" rows="6" placeholder="Escreva seu comentário aqui..." name="content" required></textarea>
+                            <textarea class="form-control @error('content') is-invalid @enderror" rows="6" 
+                                      placeholder="Escreva seu comentário aqui..." name="content" required>{{ old('content') }}</textarea>
+                            @error('content')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-send me-2"></i>Enviar Comentário

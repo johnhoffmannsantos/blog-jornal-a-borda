@@ -46,9 +46,10 @@
 
                     <div class="mb-3">
                         <label for="website_url" class="form-label fw-semibold">URL do Site</label>
-                        <input type="url" class="form-control @error('website_url') is-invalid @enderror" 
+                        <input type="text" class="form-control @error('website_url') is-invalid @enderror" 
                                id="website_url" name="website_url" value="{{ old('website_url', $partner->website_url) }}" 
                                placeholder="https://exemplo.com">
+                        <small class="text-muted">Deixe em branco se não tiver site</small>
                         @error('website_url')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -138,7 +139,7 @@
         <a href="{{ route('admin.partners.index') }}" class="btn btn-secondary">
             <i class="bi bi-x-circle me-2"></i>Cancelar
         </a>
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary" id="submitBtn">
             <i class="bi bi-check-circle me-2"></i>Salvar Alterações
         </button>
     </div>
@@ -147,20 +148,44 @@
 @push('scripts')
 <script>
     // Preview do logo
-    document.getElementById('logo').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const preview = document.getElementById('logo-preview');
-        const img = document.getElementById('preview-img');
+    const logoInput = document.getElementById('logo');
+    if (logoInput) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('logo-preview');
+            const img = document.getElementById('preview-img');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
+
+    // Garantir que o formulário seja submetido corretamente
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('partnerForm');
+        const submitBtn = document.getElementById('submitBtn');
         
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                img.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.style.display = 'none';
+        if (form && submitBtn) {
+            form.addEventListener('submit', function(e) {
+                // Validar formulário antes de submeter
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.reportValidity();
+                    return false;
+                }
+                
+                // O loading será aplicado pelo script global
+                return true;
+            });
         }
     });
 </script>
