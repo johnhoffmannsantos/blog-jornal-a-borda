@@ -71,6 +71,7 @@ class UserController extends Controller
             'position' => $validated['position'] ?? null,
             'bio' => $validated['bio'] ?? null,
             'avatar' => $validated['avatar'] ?? null,
+            'is_active' => true, // Novos usuários são criados como ativos por padrão
         ]);
 
         return redirect()->route('admin.users.index')
@@ -146,5 +147,55 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', "Usuário '{$userName}' excluído com sucesso!");
+    }
+
+    public function toggleActive(User $user)
+    {
+        $this->checkAdmin();
+        
+        // Verificar se é requisição AJAX/JSON
+        $isAjax = request()->expectsJson() || request()->ajax() || request()->header('X-Requested-With') === 'XMLHttpRequest';
+        
+        // Não permitir desativar a si mesmo
+        if ($user->id === Auth::id()) {
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => 'Você não pode desativar sua própria conta.'], 403);
+            }
+            return back()->with('error', 'Você não pode desativar sua própria conta.');
+        }
+
+        // Não permitir desativar o último admin
+        if ($user->isAdmin() && $user->is_active && User::where('role', 'admin')->where('is_active', true)->count() <= 1) {
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => 'Não é possível desativar o último administrador ativo do sistema.'], 403);
+            }
+            return back()->with('error', 'Não é possível desativar o último administrador ativo do sistema.');
+        }
+
+        try {
+            $user->is_active = !$user->is_active;
+            $user->save();
+
+            $status = $user->is_active ? 'ativado' : 'desativado';
+            
+            // Retornar JSON para requisições AJAX
+            if ($isAjax) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Usuário '{$user->name}' {$status} com sucesso!",
+                    'is_active' => $user->is_active
+                ]);
+            }
+            
+            return back()->with('success', "Usuário '{$user->name}' {$status} com sucesso!");
+        } catch (\Exception $e) {
+            if ($isAjax) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao alterar status do usuário: ' . $e->getMessage()
+                ], 500);
+            }
+            return back()->with('error', 'Erro ao alterar status do usuário.');
+        }
     }
 }

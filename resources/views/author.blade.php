@@ -15,7 +15,7 @@
             <div class="author-box mb-5">
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center mb-4 mb-md-0">
-                        <img alt="{{ $author->name }}" src="https://ui-avatars.com/api/?name={{ urlencode($author->name) }}&size=200&background=e63946&color=fff" class="rounded-circle" style="width: 180px; height: 180px; border: 5px solid white; box-shadow: var(--shadow-lg);">
+                        <img alt="{{ $author->name }}" src="{{ $author->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($author->name) . '&size=200&background=1A25FF&color=fff' }}" class="rounded-circle" style="width: 180px; height: 180px; border: 5px solid white; box-shadow: var(--shadow-lg);">
                     </div>
                     <div class="col-md-9">
                         <h1 class="mb-3">{{ $author->name }}</h1>

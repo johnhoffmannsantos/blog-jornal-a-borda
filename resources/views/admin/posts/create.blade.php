@@ -99,6 +99,25 @@
                     @enderror
                 </div>
 
+                @if(auth()->user()->isAdmin())
+                <div class="mb-3">
+                    <label for="author_id" class="form-label fw-semibold">Autor</label>
+                    <select class="form-select @error('author_id') is-invalid @enderror" 
+                            id="author_id" name="author_id">
+                        <option value="">Selecione um autor (padrão: você)</option>
+                        @foreach($authors as $author)
+                        <option value="{{ $author->id }}" {{ old('author_id') == $author->id ? 'selected' : '' }}>
+                            {{ $author->name }} ({{ ucfirst($author->role) }})
+                        </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">Deixe em branco para usar você como autor</small>
+                    @error('author_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                @endif
+
                 <div class="mb-3">
                     <label for="published_at" class="form-label fw-semibold">Data de Publicação</label>
                     <input type="datetime-local" class="form-control @error('published_at') is-invalid @enderror" 

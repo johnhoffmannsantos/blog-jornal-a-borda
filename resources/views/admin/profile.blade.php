@@ -35,7 +35,7 @@
             <div class="tab-content" id="profileTabsContent">
                 <!-- Tab 1: Informações Pessoais -->
                 <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
-                    <form method="POST" action="{{ route('admin.profile.update') }}" id="personalForm">
+                    <form method="POST" action="{{ route('admin.profile.update') }}" id="personalForm" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -144,17 +144,54 @@
                 </h5>
             </div>
             <div class="text-center py-4">
-                <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=e63946&color=fff' }}" 
-                     alt="{{ $user->name }}" 
-                     class="rounded-circle mb-3" 
-                     style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--border-color);">
-                <p class="text-muted small mb-0">
-                    @if($user->avatar)
-                        Foto personalizada
-                    @else
-                        Avatar gerado automaticamente
-                    @endif
-                </p>
+                <form method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data" id="avatarForm">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div class="mb-3 position-relative">
+                        <div class="position-relative d-inline-block">
+                            <img id="avatarPreview" 
+                                 src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=1A25FF&color=fff' }}" 
+                                 alt="{{ $user->name }}" 
+                                 class="rounded-circle mb-3" 
+                                 style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--border-color); cursor: pointer; transition: opacity 0.3s;"
+                                 onclick="document.getElementById('avatarInput').click()">
+                            <div id="avatarLoading" class="position-absolute top-50 start-50 translate-middle d-none" style="z-index: 10;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-3">
+                            @if($user->avatar)
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>Foto personalizada
+                            @else
+                                <i class="bi bi-image text-muted me-1"></i>Avatar gerado automaticamente
+                            @endif
+                        </p>
+                        <input type="file" 
+                               class="form-control d-none" 
+                               id="avatarInput" 
+                               name="avatar" 
+                               accept="image/*"
+                               onchange="previewAvatar(this)">
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="button" 
+                                    class="btn btn-outline-primary btn-sm" 
+                                    onclick="document.getElementById('avatarInput').click()">
+                                <i class="bi bi-upload me-2"></i>Alterar Foto
+                            </button>
+                            @if($user->avatar)
+                            <button type="button" 
+                                    class="btn btn-outline-danger btn-sm" 
+                                    onclick="removeAvatar()">
+                                <i class="bi bi-trash me-2"></i>Remover
+                            </button>
+                            @endif
+                        </div>
+                        <small class="text-muted d-block mt-2">Formatos: JPEG, PNG, GIF, WebP. Máx: 2MB</small>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -229,5 +266,72 @@
         }
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Validar tamanho (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('A imagem deve ter no máximo 2MB.');
+            input.value = '';
+            return;
+        }
+        
+        // Mostrar preview e loading
+        const reader = new FileReader();
+        const preview = document.getElementById('avatarPreview');
+        const loading = document.getElementById('avatarLoading');
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.opacity = '0.7';
+            loading.classList.remove('d-none');
+            
+            // Auto-submit do formulário após selecionar a imagem
+            document.getElementById('avatarForm').submit();
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeAvatar() {
+    if (confirm('Tem certeza que deseja remover sua foto de perfil? Será usado o avatar gerado automaticamente.')) {
+        const form = document.getElementById('avatarForm');
+        const loading = document.getElementById('avatarLoading');
+        const preview = document.getElementById('avatarPreview');
+        
+        // Mostrar loading
+        preview.style.opacity = '0.7';
+        loading.classList.remove('d-none');
+        
+        // Criar um input hidden para indicar remoção
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'remove_avatar';
+        input.value = '1';
+        form.appendChild(input);
+        form.submit();
+    }
+}
+
+// Adicionar loading state ao formulário
+document.addEventListener('DOMContentLoaded', function() {
+    const avatarForm = document.getElementById('avatarForm');
+    if (avatarForm) {
+        avatarForm.addEventListener('submit', function() {
+            const loading = document.getElementById('avatarLoading');
+            const preview = document.getElementById('avatarPreview');
+            if (loading && preview) {
+                preview.style.opacity = '0.7';
+                loading.classList.remove('d-none');
+            }
+        });
+    }
+});
+</script>
 @endpush
 @endsection

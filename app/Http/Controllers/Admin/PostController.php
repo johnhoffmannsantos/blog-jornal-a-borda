@@ -62,7 +62,8 @@ class PostController extends Controller
     {
         $categories = Category::all();
         $tags = Tag::all();
-        return view('admin.posts.create', compact('categories', 'tags'));
+        $authors = Auth::user()->isAdmin() ? \App\Models\User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
+        return view('admin.posts.create', compact('categories', 'tags', 'authors'));
     }
 
     public function store(Request $request)
@@ -76,6 +77,7 @@ class PostController extends Controller
             'status' => ['required', 'in:draft,published'],
             'published_at' => ['nullable', 'date'],
             'tags' => ['nullable', 'array'],
+            'author_id' => ['nullable', 'exists:users,id'],
         ]);
 
         $featuredImage = null;
@@ -88,13 +90,18 @@ class PostController extends Controller
             $featuredImage = Storage::disk('public')->url($path);
         }
 
+        // Determinar o autor: se for ADMIN e forneceu author_id, usar; senão usar o usuário logado
+        $authorId = Auth::user()->isAdmin() && isset($validated['author_id']) && $validated['author_id'] 
+            ? $validated['author_id'] 
+            : Auth::id();
+
         $post = Post::create([
             'title' => $validated['title'],
             'slug' => Str::slug($validated['title']),
             'excerpt' => $validated['excerpt'],
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
-            'author_id' => Auth::id(),
+            'author_id' => $authorId,
             'featured_image' => $featuredImage,
             'status' => $validated['status'],
             'published_at' => $validated['published_at'] ?? ($validated['status'] === 'published' ? now() : null),
@@ -131,8 +138,9 @@ class PostController extends Controller
         $categories = Category::all();
         $tags = Tag::all();
         $postTags = $post->tags->pluck('id')->toArray();
+        $authors = Auth::user()->isAdmin() ? \App\Models\User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
 
-        return view('admin.posts.edit', compact('post', 'categories', 'tags', 'postTags'));
+        return view('admin.posts.edit', compact('post', 'categories', 'tags', 'postTags', 'authors'));
     }
 
     public function update(Request $request, Post $post)
@@ -153,6 +161,7 @@ class PostController extends Controller
             'status' => ['required', 'in:draft,published'],
             'published_at' => ['nullable', 'date'],
             'tags' => ['nullable', 'array'],
+            'author_id' => ['nullable', 'exists:users,id'],
         ]);
 
         $featuredImage = $post->featured_image;
@@ -173,12 +182,19 @@ class PostController extends Controller
             $featuredImage = Storage::disk('public')->url($path);
         }
 
+        // Determinar o autor: se for ADMIN e forneceu author_id, usar; senão manter o autor atual
+        $authorId = $post->author_id;
+        if (Auth::user()->isAdmin() && isset($validated['author_id']) && $validated['author_id']) {
+            $authorId = $validated['author_id'];
+        }
+
         $post->update([
             'title' => $validated['title'],
             'slug' => Str::slug($validated['title']),
             'excerpt' => $validated['excerpt'],
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
+            'author_id' => $authorId,
             'featured_image' => $featuredImage,
             'status' => $validated['status'],
             'published_at' => $validated['published_at'] ?? ($validated['status'] === 'published' && !$post->published_at ? now() : $post->published_at),

@@ -23,7 +23,7 @@
                     <h1 class="post-title">{{ $post->title }}</h1>
                     <ul class="post-meta list-inline mb-4">
                         <li class="list-inline-item">
-                            <img alt="{{ $post->author->name }}" src="https://ui-avatars.com/api/?name={{ urlencode($post->author->name) }}&size=48&background=e63946&color=fff">
+                            <img alt="{{ $post->author->name }}" src="{{ $post->author->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->author->name) . '&size=48&background=1A25FF&color=fff' }}">
                             <a href="{{ route('author.show', $post->author->id) }}">{{ $post->author->name }}</a>
                         </li>
                         <li class="list-inline-item">
@@ -67,7 +67,7 @@
                 <div class="author-box mt-5">
                     <div class="row align-items-center">
                         <div class="col-auto">
-                            <img alt="{{ $post->author->name }}" src="https://ui-avatars.com/api/?name={{ urlencode($post->author->name) }}&size=120&background=e63946&color=fff" class="rounded-circle">
+                            <img alt="{{ $post->author->name }}" src="{{ $post->author->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->author->name) . '&size=120&background=1A25FF&color=fff' }}" class="rounded-circle">
                         </div>
                         <div class="col">
                             <h3 class="mb-1">{{ $post->author->name }}</h3>
@@ -123,7 +123,7 @@
                         <div class="comment-item mb-4 pb-4 border-bottom">
                             <div class="d-flex align-items-start">
                                 <div class="comment-avatar me-3">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($comment->author_name) }}&size=48&background=e63946&color=fff" 
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($comment->author_name) }}&size=48&background=1A25FF&color=fff" 
                                          alt="{{ $comment->author_name }}" class="rounded-circle">
                                 </div>
                                 <div class="comment-content flex-grow-1">

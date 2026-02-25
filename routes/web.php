@@ -64,6 +64,7 @@ Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     
     // Users (Admin only)
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::post('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggleActive');
     
     // Image Upload (TinyMCE)
     Route::post('/upload-image', [ImageUploadController::class, 'upload'])->name('upload.image');

@@ -34,9 +34,9 @@
             <div class="col-md-6 col-lg-4 col-xl-3">
                 <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; transition: var(--transition);">
                     <div class="card-body text-center p-4">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($member->name) }}&size=150&background=e63946&color=fff" 
+                        <img src="{{ $member->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($member->name) . '&size=150&background=1A25FF&color=fff' }}" 
                              class="rounded-circle mb-3" 
-                             style="width: 120px; height: 120px; border: 4px solid white; box-shadow: var(--shadow-md);">
+                             style="width: 120px; height: 120px; border: 4px solid white; box-shadow: var(--shadow-md); object-fit: cover;">
                         <h5 class="fw-bold mb-1">{{ $member->name }}</h5>
                         <p class="text-muted small mb-2">{{ $member->position }}</p>
                         @if($member->bio)

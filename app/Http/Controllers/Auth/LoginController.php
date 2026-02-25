@@ -24,7 +24,24 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
+        // Verificar se o usuário existe e está ativo antes de tentar autenticar
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        
+        if ($user && !$user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => __('Sua conta está desativada. Entre em contato com o administrador.'),
+            ]);
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            // Verificar novamente após autenticação (caso tenha mudado durante o processo)
+            if (!Auth::user()->is_active) {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'email' => __('Sua conta está desativada. Entre em contato com o administrador.'),
+                ]);
+            }
+            
             $request->session()->regenerate();
             return redirect()->intended(route('admin.dashboard'));
         }
@@ -48,10 +65,10 @@ class LoginController extends Controller
             abort(403, 'Acesso rápido disponível apenas em desenvolvimento');
         }
 
-        $users = \App\Models\User::where('role', $role)->get();
+        $users = \App\Models\User::where('role', $role)->where('is_active', true)->get();
         
         if ($users->isEmpty()) {
-            return redirect()->route('login')->with('error', 'Nenhum usuário encontrado com este perfil');
+            return redirect()->route('login')->with('error', 'Nenhum usuário ativo encontrado com este perfil');
         }
 
         Auth::login($users->first());

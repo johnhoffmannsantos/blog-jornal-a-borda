@@ -146,7 +146,7 @@
                 </h5>
             </div>
             <div class="text-center py-4">
-                <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=e63946&color=fff' }}" 
+                <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=1A25FF&color=fff' }}" 
                      alt="{{ $user->name }}" 
                      id="avatarPreview"
                      class="rounded-circle mb-3" 
@@ -197,7 +197,7 @@
         if (url && url.startsWith('http')) {
             preview.src = url;
         } else if (!url) {
-            preview.src = 'https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=200&background=e63946&color=fff';
+            preview.src = 'https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=200&background=1A25FF&color=fff';
         }
     });
 </script>

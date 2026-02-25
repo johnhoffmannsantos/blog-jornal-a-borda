@@ -28,7 +28,7 @@
                         </h1>
                         <div class="post-meta">
                             <span class="post-author">
-                                <img alt="{{ $featuredPost->author->name }}" src="https://ui-avatars.com/api/?name={{ urlencode($featuredPost->author->name) }}&size=64&background=e63946&color=fff">
+                                <img alt="{{ $featuredPost->author->name }}" src="{{ $featuredPost->author->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($featuredPost->author->name) . '&size=64&background=1A25FF&color=fff' }}">
                                 <a href="{{ route('author.show', $featuredPost->author->id) }}">{{ $featuredPost->author->name }}</a>
                             </span>
                             <span class="post-meta-date">
@@ -72,7 +72,7 @@
                                 </h3>
                                 <div class="post-meta">
                                     <span class="post-author">
-                                        <img alt="{{ $post->author->name }}" src="https://ui-avatars.com/api/?name={{ urlencode($post->author->name) }}&size=32&background=e63946&color=fff">
+                                        <img alt="{{ $post->author->name }}" src="{{ $post->author->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($post->author->name) . '&size=32&background=1A25FF&color=fff' }}">
                                         <a href="{{ route('author.show', $post->author->id) }}">{{ $post->author->name }}</a>
                                     </span>
                                     <span class="post-meta-date">

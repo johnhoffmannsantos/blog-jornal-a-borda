@@ -62,6 +62,7 @@
                     <th>Role</th>
                     <th>Cargo</th>
                     <th>Posts</th>
+                    <th>Ativo</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -70,7 +71,7 @@
                 <tr>
                     <td>{{ $user->id }}</td>
                     <td>
-                        <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=64&background=e63946&color=fff' }}" 
+                        <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=64&background=1A25FF&color=fff' }}" 
                              alt="{{ $user->name }}" 
                              class="rounded-circle" 
                              style="width: 40px; height: 40px; object-fit: cover;">
@@ -94,6 +95,25 @@
                         <span class="badge bg-secondary">{{ $user->posts_count }} post(s)</span>
                     </td>
                     <td>
+                        @if($user->id !== Auth::id())
+                        <div class="form-check form-switch">
+                            <input class="form-check-input user-active-toggle" 
+                                   type="checkbox" 
+                                   role="switch" 
+                                   id="toggle_{{ $user->id }}"
+                                   data-user-id="{{ $user->id }}"
+                                   data-user-name="{{ $user->name }}"
+                                   {{ $user->is_active ? 'checked' : '' }}
+                                   style="cursor: pointer; width: 3em; height: 1.5em;">
+                            <label class="form-check-label" for="toggle_{{ $user->id }}" style="cursor: pointer;">
+                                <span class="visually-hidden">Ativar/Desativar usuário</span>
+                            </label>
+                        </div>
+                        @else
+                        <span class="badge bg-info">Você</span>
+                        @endif
+                    </td>
+                    <td>
                         <div class="d-flex gap-2">
                             <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary" title="Editar">
                                 <i class="bi bi-pencil"></i>
@@ -113,7 +133,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="text-center py-4">
+                    <td colspan="9" class="text-center py-4">
                         <p class="text-muted mb-0">Nenhum usuário encontrado.</p>
                     </td>
                 </tr>
@@ -128,5 +148,95 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Interceptar mudanças nos switches de ativar/desativar
+    document.querySelectorAll('.user-active-toggle').forEach(function(toggle) {
+        toggle.addEventListener('change', function() {
+            const userId = this.dataset.userId;
+            const userName = this.dataset.userName;
+            const isActive = this.checked;
+            const toggleElement = this;
+            
+            // Desabilitar o toggle durante a requisição
+            toggleElement.disabled = true;
+            
+            // Obter CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            const token = csrfToken ? csrfToken.getAttribute('content') : '';
+            
+            if (!token) {
+                toggleElement.disabled = false;
+                toggleElement.checked = !isActive;
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Token CSRF não encontrado. Recarregue a página.');
+                }
+                return;
+            }
+            
+            // Criar form data
+            const formData = new FormData();
+            formData.append('_token', token);
+            
+            // Fazer requisição AJAX
+            fetch(`/painel/users/${userId}/toggle-active`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                credentials: 'same-origin'
+            })
+            .then(async response => {
+                // Verificar se a resposta é JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Erro na requisição');
+                    }
+                    return data;
+                } else {
+                    // Se não for JSON, tentar ler como texto para debug
+                    const text = await response.text();
+                    console.error('Resposta não é JSON:', text.substring(0, 200));
+                    throw new Error('Resposta do servidor não é válida. Tente novamente.');
+                }
+            })
+            .then(data => {
+                // Reabilitar o toggle
+                toggleElement.disabled = false;
+                
+                if (data.success) {
+                    const status = isActive ? 'ativado' : 'desativado';
+                    if (typeof showToast === 'function') {
+                        showToast('success', `Usuário '${userName}' ${status} com sucesso!`);
+                    }
+                } else {
+                    // Reverter o estado do toggle em caso de erro
+                    toggleElement.checked = !isActive;
+                    if (typeof showToast === 'function') {
+                        showToast('error', data.message || 'Erro ao alterar status do usuário.');
+                    }
+                }
+            })
+            .catch(error => {
+                // Reabilitar o toggle e reverter estado
+                toggleElement.disabled = false;
+                toggleElement.checked = !isActive;
+                console.error('Erro:', error);
+                if (typeof showToast === 'function') {
+                    showToast('error', error.message || 'Erro ao alterar status do usuário. Tente novamente.');
+                }
+            });
+        });
+    });
+});
+</script>
+@endpush
 @endsection
 
