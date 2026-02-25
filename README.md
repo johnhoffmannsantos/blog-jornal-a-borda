@@ -450,6 +450,25 @@ O script verifica dependências, instala pacotes, configura o ambiente, executa 
 - TinyMCE 8.3.2 (self-hosted)
 - Chart.js (para gráficos)
 
+## 🚀 Deploy em Produção
+
+Após fazer deploy no servidor de produção, execute o script para limpar os caches:
+
+```bash
+./deploy.sh
+```
+
+Ou manualmente:
+
+```bash
+php artisan route:clear
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+```
+
+**IMPORTANTE:** Sempre limpe os caches após fazer deploy, especialmente se houver alterações em rotas ou configurações.
+
 ## 🐛 Troubleshooting
 
 ### Problema: Erro ao executar migrations
