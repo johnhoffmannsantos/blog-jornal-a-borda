@@ -142,9 +142,9 @@
     
     // Cores para os gráficos
     const colors = [
-        '#e63946', '#457b9d', '#a8dadc', '#f1faee', '#1d3557',
-        '#ff6b6b', '#4ecdc4', '#ffe66d', '#95e1d3', '#f38181',
-        '#aa96da', '#fcbad3', '#ffffd2', '#a8e6cf', '#dcedc1'
+        '#1A25FF', '#4A54FF', '#6B73FF', '#8C92FF', '#ADB1FF',
+        '#CECFFF', '#F0F1FF', '#1419CC', '#0F14B3', '#0A0F99',
+        '#050A80', '#0005FF', '#3338FF', '#666BFF', '#999EFF'
     ];
 
     // Gráfico de Barras

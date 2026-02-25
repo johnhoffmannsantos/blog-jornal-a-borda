@@ -221,7 +221,7 @@
     }
 
     .form-check-input:checked + .form-check-label .badge {
-        background: #e63946 !important;
+        background: #1A25FF !important;
         color: white !important;
     }
 
@@ -234,7 +234,7 @@
 
     .admin-card .card-header {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-bottom: 2px solid #e63946;
+        border-bottom: 2px solid #1A25FF;
     }
 </style>
 @endpush

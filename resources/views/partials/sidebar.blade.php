@@ -172,7 +172,7 @@
 
 .newsletter-form .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+    box-shadow: 0 0 0 3px rgba(26, 37, 255, 0.1);
 }
 
 /* Ad Widget */

@@ -11,12 +11,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #e63946;
-            --primary-dark: #d62839;
-            --secondary-color: #457b9d;
-            --accent-color: #f1faee;
-            --dark-bg: #1d3557;
-            --text-dark: #2b2d42;
+            --primary-color: #1A25FF;
+            --primary-dark: #1419CC;
+            --secondary-color: #4A54FF;
+            --accent-color: #F0F1FF;
+            --dark-bg: #1A25FF;
+            --text-dark: #000000;
             --text-light: #6c757d;
             --border-color: #e9ecef;
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
@@ -48,7 +48,7 @@
 
         /* Header Styles */
         .header-top {
-            background: linear-gradient(135deg, var(--dark-bg) 0%, #2a4a6b 100%);
+            background: #1A25FF;
             padding: 12px 0;
             color: white;
         }
@@ -175,10 +175,7 @@
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #1A25FF;
             margin: 0;
             letter-spacing: -0.5px;
         }
@@ -489,7 +486,7 @@
 
         /* Footer */
         .copy-right {
-            background: var(--dark-bg);
+            background: #1A25FF;
             color: white;
             padding: 30px 0;
             margin-top: 60px;
@@ -574,7 +571,7 @@
             left: 0;
             width: 80px;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            background: #1A25FF;
             border-radius: 2px;
         }
 
@@ -674,11 +671,11 @@
 
         .comment-form .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+            box-shadow: 0 0 0 3px rgba(26, 37, 255, 0.1);
         }
 
         .btn-primary {
-            background: var(--primary-color);
+            background: #1A25FF;
             border: none;
             padding: 12px 32px;
             border-radius: 8px;
@@ -687,9 +684,20 @@
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: #1419CC;
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline-primary {
+            border-color: #1A25FF;
+            color: #1A25FF;
+        }
+
+        .btn-outline-primary:hover {
+            background: #1A25FF;
+            border-color: #1A25FF;
+            color: white;
         }
 
         /* Responsive - Menu Mobile */
@@ -713,7 +721,7 @@
             }
 
             .header-nav .navbar-toggler:focus {
-                box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+                box-shadow: 0 0 0 3px rgba(26, 37, 255, 0.1);
             }
 
             .header-nav .navbar-toggler[aria-expanded="true"] {

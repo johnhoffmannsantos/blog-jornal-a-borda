@@ -12,12 +12,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #e63946;
-            --primary-dark: #d62839;
-            --secondary-color: #457b9d;
-            --sidebar-bg: #1d3557;
-            --sidebar-hover: #2a4a6b;
-            --text-dark: #2b2d42;
+            --primary-color: #1A25FF;
+            --primary-dark: #1419CC;
+            --secondary-color: #4A54FF;
+            --sidebar-bg: #1A25FF;
+            --sidebar-hover: #1419CC;
+            --text-dark: #000000;
             --text-light: #6c757d;
             --border-color: #e9ecef;
             --bg-light: #f8f9fa;
@@ -247,17 +247,38 @@
         }
 
         .role-badge.admin {
-            background: #dc3545;
+            background: #1A25FF;
             color: white;
         }
 
         .role-badge.editor {
-            background: #0d6efd;
+            background: #4A54FF;
             color: white;
         }
 
         .role-badge.author {
-            background: #198754;
+            background: #6B73FF;
+            color: white;
+        }
+
+        .btn-primary {
+            background: #1A25FF;
+            border-color: #1A25FF;
+        }
+
+        .btn-primary:hover {
+            background: #1419CC;
+            border-color: #1419CC;
+        }
+
+        .btn-outline-primary {
+            border-color: #1A25FF;
+            color: #1A25FF;
+        }
+
+        .btn-outline-primary:hover {
+            background: #1A25FF;
+            border-color: #1A25FF;
             color: white;
         }
     </style>
@@ -279,7 +300,7 @@
                 <div class="fw-semibold">{{ auth()->user()->name }}</div>
                 <small class="text-muted">{{ auth()->user()->position ?? ucfirst(auth()->user()->role) }}</small>
             </div>
-            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=80&background=e63946&color=fff" 
+            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=80&background=1A25FF&color=fff" 
                  class="user-avatar" alt="{{ auth()->user()->name }}">
             <form method="POST" action="{{ route('logout') }}" class="d-inline">
                 @csrf
@@ -293,7 +314,7 @@
     <!-- Sidebar -->
     <div class="admin-sidebar">
         <div class="user-card text-center">
-            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=120&background=e63946&color=fff" 
+            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=120&background=1A25FF&color=fff" 
                  alt="{{ auth()->user()->name }}">
             <h6>{{ auth()->user()->name }}</h6>
             <small>{{ auth()->user()->position ?? ucfirst(auth()->user()->role) }}</small>

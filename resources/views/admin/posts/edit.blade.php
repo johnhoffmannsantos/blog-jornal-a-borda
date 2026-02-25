@@ -279,7 +279,7 @@
     }
 
     .form-check-input:checked + .form-check-label .badge {
-        background: #e63946 !important;
+        background: #1A25FF !important;
         color: white !important;
     }
 
