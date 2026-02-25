@@ -88,7 +88,86 @@
             }
 
             .navbar {
-                padding: 10px 0;
+                padding: 15px 0;
+                min-height: 70px;
+            }
+
+            /* Logo mobile com espaçamento */
+            .navbar .logo {
+                padding: 8px 0;
+                margin-right: 15px;
+            }
+
+            .navbar .logo img {
+                max-height: 45px !important;
+                max-width: 180px !important;
+                display: block;
+            }
+
+            .navbar .logo h2 {
+                font-size: 1.3rem;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Menu collapse melhorado */
+            .navbar-collapse {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                border-top: 2px solid var(--primary-color);
+                margin-top: 10px;
+                padding: 20px 15px;
+                z-index: 1000;
+                max-height: calc(100vh - 80px);
+                overflow-y: auto;
+            }
+
+            .navbar-nav {
+                margin: 0;
+            }
+
+            .navbar-nav .nav-item {
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .navbar-nav .nav-item:last-child {
+                border-bottom: none;
+            }
+
+            .navbar-nav .nav-link {
+                padding: 15px 0;
+                font-size: 16px;
+                font-weight: 500;
+                color: var(--text-dark);
+            }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                color: var(--primary-color);
+                background: transparent;
+            }
+
+            .navbar-nav .nav-link::after {
+                display: none;
+            }
+
+            .dropdown-menu {
+                position: static !important;
+                float: none;
+                width: 100%;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                box-shadow: none;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+            }
+
+            .dropdown-item {
+                padding: 12px 20px;
             }
         }
 
@@ -613,24 +692,59 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* Responsive */
+        /* Responsive - Menu Mobile */
         @media (max-width: 991px) {
             .header-nav .navbar {
                 flex-wrap: nowrap;
+                align-items: center;
             }
 
             .header-nav .navbar-toggler {
-                border: none;
-                padding: 8px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                padding: 8px 12px;
                 margin-left: auto;
+                transition: var(--transition);
+            }
+
+            .header-nav .navbar-toggler:hover {
+                border-color: var(--primary-color);
+                background: var(--accent-color);
             }
 
             .header-nav .navbar-toggler:focus {
-                box-shadow: none;
+                box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+            }
+
+            .header-nav .navbar-toggler[aria-expanded="true"] {
+                border-color: var(--primary-color);
+                background: var(--primary-color);
+            }
+
+            .header-nav .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 4l8 8M12 4l-8 8'/%3e%3c/svg%3e");
             }
 
             .header-nav .navbar-toggler-icon {
                 background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+                width: 24px;
+                height: 24px;
+            }
+
+            /* Animação suave do menu */
+            .navbar-collapse {
+                animation: slideDown 0.3s ease-out;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
         }
 
@@ -709,15 +823,15 @@
         <div class="container">
             <nav class="navbar navbar-expand-lg">
                 <!-- Logo Mobile (dentro do nav) -->
-                <div class="d-md-none d-flex align-items-center me-auto">
-                    <a href="{{ route('home') }}" class="logo me-3">
+                <div class="d-md-none d-flex align-items-center">
+                    <a href="{{ route('home') }}" class="logo">
                         @php
                             $logo = \App\Models\Setting::get('site_logo');
                         @endphp
                         @if($logo)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url($logo) }}" alt="{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}" style="max-height: 45px; max-width: 180px;">
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($logo) }}" alt="{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}" style="max-height: 45px; max-width: 180px; display: block;">
                         @else
-                            <h2 style="font-size: 1.3rem; margin: 0;">{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}</h2>
+                            <h2 style="font-size: 1.3rem; margin: 0; padding: 0;">{{ \App\Models\Setting::get('site_name', 'Jornal a Borda') }}</h2>
                         @endif
                     </a>
                 </div>
