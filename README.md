@@ -411,6 +411,17 @@ make seed           # Executa seeders
 make clear          # Limpa todos os caches
 ```
 
+## 🚀 Script de Instalação (Sem Docker)
+
+O projeto inclui um script `install.sh` que automatiza toda a instalação sem Docker:
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+O script verifica dependências, instala pacotes, configura o ambiente, executa migrations e seeders automaticamente.
+
 ## 🗄️ Banco de Dados
 
 ### Tabelas Principais
