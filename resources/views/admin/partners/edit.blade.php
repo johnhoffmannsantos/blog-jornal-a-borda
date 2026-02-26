@@ -124,7 +124,8 @@
                     </div>
 
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                        <input type="hidden" name="is_active" value="0">
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
                                {{ old('is_active', $partner->is_active) ? 'checked' : '' }}>
                         <label class="form-check-label" for="is_active">
                             Ativo
@@ -174,6 +175,10 @@
         const submitBtn = document.getElementById('submitBtn');
         
         if (form && submitBtn) {
+            // Marcar formulário como validado para o script global não interferir
+            form.dataset.validated = 'true';
+            
+            // Interceptar o submit do formulário
             form.addEventListener('submit', function(e) {
                 // Validar formulário antes de submeter
                 if (!form.checkValidity()) {
@@ -183,8 +188,24 @@
                     return false;
                 }
                 
-                // O loading será aplicado pelo script global
-                return true;
+                // Aplicar loading apenas se ainda não estiver aplicado
+                if (!submitBtn.disabled && !submitBtn.classList.contains('loading')) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    
+                    const originalHTML = submitBtn.innerHTML;
+                    submitBtn.dataset.originalHTML = originalHTML;
+                    
+                    const icon = submitBtn.querySelector('i');
+                    if (icon) {
+                        icon.style.display = 'none';
+                    }
+                    
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...';
+                }
+                
+                // Permitir que o formulário seja submetido normalmente
+                // Não fazer preventDefault aqui se a validação passou!
             });
         }
     });

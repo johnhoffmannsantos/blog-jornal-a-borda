@@ -112,7 +112,8 @@
                     </div>
 
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                        <input type="hidden" name="is_active" value="0">
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
                                {{ old('is_active', true) ? 'checked' : '' }}>
                         <label class="form-check-label" for="is_active">
                             Ativo
@@ -150,6 +151,47 @@
             reader.readAsDataURL(file);
         } else {
             preview.style.display = 'none';
+        }
+    });
+
+    // Garantir que o formulário seja submetido corretamente
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('partnerForm');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        if (form && submitBtn) {
+            // Marcar formulário como validado para o script global não interferir
+            form.dataset.validated = 'true';
+            
+            // Interceptar o submit do formulário
+            form.addEventListener('submit', function(e) {
+                // Validar formulário antes de submeter
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.reportValidity();
+                    return false;
+                }
+                
+                // Aplicar loading apenas se ainda não estiver aplicado
+                if (!submitBtn.disabled && !submitBtn.classList.contains('loading')) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    
+                    const originalHTML = submitBtn.innerHTML;
+                    submitBtn.dataset.originalHTML = originalHTML;
+                    
+                    const icon = submitBtn.querySelector('i');
+                    if (icon) {
+                        icon.style.display = 'none';
+                    }
+                    
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Criando...';
+                }
+                
+                // Permitir que o formulário seja submetido normalmente
+                // Não fazer preventDefault aqui se a validação passou!
+            });
         }
     });
 </script>

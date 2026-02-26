@@ -386,7 +386,7 @@
             
             forms.forEach(function(form) {
                 // Pular formulários que já têm validação customizada
-                if (form.id === 'journalEditionForm' || form.id === 'settingsForm' || form.id === 'avatarForm') {
+                if (form.id === 'journalEditionForm' || form.id === 'settingsForm' || form.id === 'avatarForm' || form.id === 'partnerForm') {
                     return;
                 }
                 

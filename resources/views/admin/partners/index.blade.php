@@ -3,6 +3,7 @@
 @section('title', 'Parceiros - Painel Administrativo')
 
 @section('content')
+{{-- Mensagens serão exibidas via Toast --}}
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
         <h1>
