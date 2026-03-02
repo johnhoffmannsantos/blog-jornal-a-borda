@@ -74,7 +74,7 @@
                         <span class="badge bg-light text-dark ms-2" id="content-count">{{ strlen($post->content) }} caracteres</span>
                     </label>
                     <textarea class="form-control @error('content') is-invalid @enderror" 
-                              id="content" name="content" rows="20" required
+                              id="content" name="content" rows="20"
                               placeholder="Escreva o conteúdo completo do post aqui...">{{ old('content', $post->content) }}</textarea>
                     <small class="text-muted">Use o editor WYSIWYG acima para formatar o conteúdo do post.</small>
                     @error('content')
@@ -433,14 +433,34 @@
 
     // Validação antes de enviar
     document.getElementById('postForm').addEventListener('submit', function(e) {
+        const form = this;
+        // Primeiro, deixa o browser validar os campos "normais"
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+            form.reportValidity();
+            return false;
+        }
+
         const title = document.getElementById('title').value.trim();
         // Obter conteúdo do TinyMCE
-        const content = tinymce.get('content') ? tinymce.get('content').getContent() : '';
+        const editor = tinymce.get('content');
+        const contentText = editor ? editor.getContent({ format: 'text' }).trim() : '';
         
-        if (!title || !content.trim()) {
+        if (!title || !contentText) {
             e.preventDefault();
-            alert('Por favor, preencha pelo menos o título e o conteúdo do post.');
+            if (typeof window.showToast === 'function') {
+                window.showToast('error', 'Por favor, preencha pelo menos o título e o conteúdo do post.');
+            } else {
+                alert('Por favor, preencha pelo menos o título e o conteúdo do post.');
+            }
+            if (editor && !contentText) editor.focus();
             return false;
+        }
+
+        // Sincroniza conteúdo do TinyMCE com o textarea antes de enviar
+        if (typeof tinymce.triggerSave === 'function') {
+            tinymce.triggerSave();
         }
     });
 </script>

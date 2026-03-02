@@ -63,7 +63,7 @@
                         <span class="badge bg-light text-dark ms-2" id="content-count">0 caracteres</span>
                     </label>
                     <textarea class="form-control @error('content') is-invalid @enderror" 
-                              id="content" name="content" rows="20" required
+                              id="content" name="content" rows="20"
                               placeholder="Escreva o conteúdo completo do post aqui...">{{ old('content') }}</textarea>
                     <small class="text-muted">Use o editor WYSIWYG acima para formatar o conteúdo do post.</small>
                     @error('content')
@@ -370,6 +370,40 @@
                 reader.readAsDataURL(file);
             } else {
                 preview.style.display = 'none';
+            }
+        });
+    }
+
+    // Validação antes de enviar (TinyMCE esconde o textarea, então não dá para usar required nele)
+    const postForm = document.getElementById('postForm');
+    if (postForm) {
+        postForm.addEventListener('submit', function(e) {
+            // Primeiro, deixa o browser validar os campos "normais"
+            if (!postForm.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                postForm.reportValidity();
+                return false;
+            }
+
+            const editor = tinymce.get('content');
+            const textContent = editor ? editor.getContent({ format: 'text' }).trim() : '';
+
+            if (!textContent) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof window.showToast === 'function') {
+                    window.showToast('error', 'O conteúdo do post é obrigatório.');
+                } else {
+                    alert('O conteúdo do post é obrigatório.');
+                }
+                if (editor) editor.focus();
+                return false;
+            }
+
+            // Sincroniza conteúdo do TinyMCE com o textarea antes de enviar
+            if (typeof tinymce.triggerSave === 'function') {
+                tinymce.triggerSave();
             }
         });
     }
