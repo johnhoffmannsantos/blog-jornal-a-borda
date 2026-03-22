@@ -23,8 +23,8 @@ class AppServiceProvider extends ServiceProvider
         // Definir locale para português brasileiro
         app()->setLocale('pt_BR');
 
-        // Paginação alinhada ao Bootstrap (admin e site); o padrão do Laravel é Tailwind
-        Paginator::defaultView('pagination::bootstrap-5');
-        Paginator::defaultSimpleView('pagination::simple-bootstrap-5');
+        // Views em resources/views/pagination/ (textos em pt-BR; vendor/ pode estar sem permissão de escrita)
+        Paginator::defaultView('pagination.bootstrap-5');
+        Paginator::defaultSimpleView('pagination.simple-bootstrap-5');
     }
 }
