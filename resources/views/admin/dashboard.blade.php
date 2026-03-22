@@ -11,9 +11,9 @@
 </div>
 
 <!-- Stats Cards -->
-<div class="row g-4 mb-4">
+<div class="row g-2 g-md-3 mb-3">
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                 <i class="bi bi-file-text"></i>
             </div>
@@ -23,7 +23,7 @@
     </div>
 
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-success bg-opacity-10 text-success">
                 <i class="bi bi-file-earmark-text"></i>
             </div>
@@ -33,7 +33,7 @@
     </div>
 
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-info bg-opacity-10 text-info">
                 <i class="bi bi-chat-dots"></i>
             </div>
@@ -43,7 +43,7 @@
     </div>
 
     <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                 <i class="bi bi-tags"></i>
             </div>
@@ -54,9 +54,9 @@
 </div>
 
 <!-- Recent Posts -->
-<div class="row">
-    <div class="col-lg-8 mb-4">
-        <div class="admin-card">
+<div class="row g-3">
+    <div class="col-lg-8 mb-3">
+        <div class="admin-card mb-0">
             <div class="card-header">
                 <h5>
                     <i class="bi bi-clock-history me-2"></i>Posts Recentes
@@ -89,8 +89,8 @@
         </div>
     </div>
 
-    <div class="col-lg-4">
-        <div class="admin-card">
+    <div class="col-lg-4 mb-3">
+        <div class="admin-card mb-0">
             <div class="card-header">
                 <h5>
                     <i class="bi bi-hourglass-split me-2"></i>Comentários Pendentes

@@ -70,7 +70,7 @@
                         <code class="text-muted">{{ $tag->slug }}</code>
                     </td>
                     <td>
-                        <span class="badge bg-info">{{ $tag->posts_count }} post(s)</span>
+                        <span class="badge badge-sidebar">{{ $tag->posts_count }} post(s)</span>
                     </td>
                     <td>
                         <div class="d-flex gap-2">

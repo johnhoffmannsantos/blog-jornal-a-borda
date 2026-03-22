@@ -147,7 +147,7 @@
         }
 
         .admin-content .page-header {
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .admin-content .page-header h1 {
@@ -218,6 +218,39 @@
             color: var(--text-light);
             font-size: 13px;
             margin: 0;
+        }
+
+        .stat-card.stat-card-compact {
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+
+        .stat-card.stat-card-compact:hover {
+            transform: translateY(-1px);
+        }
+
+        .stat-card.stat-card-compact .stat-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+        }
+
+        .stat-card.stat-card-compact .stat-value {
+            font-size: 1.35rem;
+            margin-bottom: 2px;
+        }
+
+        .stat-card.stat-card-compact .stat-label {
+            font-size: 12px;
+        }
+
+        .badge-sidebar {
+            background: var(--sidebar-bg);
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.75rem;
         }
 
         /* Responsive */

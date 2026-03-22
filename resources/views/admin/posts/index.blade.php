@@ -42,6 +42,7 @@
     </div>
     <div class="offcanvas-body">
         <form method="GET" action="{{ route('admin.posts.index') }}" id="postsFiltersForm">
+            <input type="hidden" name="page" value="1">
             <input type="hidden" name="dir" value="{{ request('dir', 'desc') }}">
 
             <div class="mb-3">
@@ -104,9 +105,9 @@
 {{-- Mensagens serão exibidas via Toast --}}
 
 <!-- Cards de Estatísticas -->
-<div class="row g-4 mb-4">
+<div class="row g-2 g-md-3 mb-3">
     <div class="col-md-4">
-        <div class="stat-card">
+        <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                 <i class="bi bi-file-text"></i>
             </div>
@@ -115,7 +116,7 @@
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card">
+        <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-success bg-opacity-10 text-success">
                 <i class="bi bi-check-circle"></i>
             </div>
@@ -124,7 +125,7 @@
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card">
+        <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                 <i class="bi bi-file-earmark"></i>
             </div>
@@ -137,7 +138,7 @@
 <!-- Lista de Posts -->
 <div class="admin-card">
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover align-middle">
             <thead>
                 <tr>
                     <th style="width: 60px;">Imagem</th>
@@ -192,7 +193,7 @@
                         <small>{{ $post->published_at ? $post->published_at->format('d/m/Y') : '—' }}</small>
                     </td>
                     <td>
-                        <span class="badge bg-info">
+                        <span class="badge badge-sidebar">
                             <i class="bi bi-eye me-1"></i>{{ $post->views ?? 0 }}
                         </span>
                     </td>

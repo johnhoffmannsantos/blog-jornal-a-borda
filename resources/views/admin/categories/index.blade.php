@@ -74,7 +74,7 @@
                         <small class="text-muted">{{ Str::limit($category->description ?? 'Sem descrição', 50) }}</small>
                     </td>
                     <td>
-                        <span class="badge bg-info">{{ $category->posts_count }} post(s)</span>
+                        <span class="badge badge-sidebar">{{ $category->posts_count }} post(s)</span>
                     </td>
                     <td>
                         <div class="d-flex gap-2">
