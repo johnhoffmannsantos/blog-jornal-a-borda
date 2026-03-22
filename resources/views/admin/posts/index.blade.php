@@ -50,35 +50,64 @@
 
 <!-- Filtros -->
 <div class="admin-card mb-4">
-    <form method="GET" action="{{ route('admin.posts.index') }}" class="row g-3">
-        <div class="col-md-4">
-            <label class="form-label">Buscar</label>
-            <input type="text" class="form-control" name="search" 
-                   value="{{ request('search') }}" placeholder="Título do post...">
+    <form method="GET" action="{{ route('admin.posts.index') }}">
+        <input type="hidden" name="dir" value="{{ request('dir', 'desc') }}">
+
+        <div class="row g-3">
+            <div class="col-md-6 col-lg-4">
+                <label class="form-label">Buscar</label>
+                <input type="text" class="form-control" name="search" 
+                       value="{{ request('search') }}" placeholder="Título do post...">
+            </div>
+            <div class="col-md-6 col-lg-2">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publicado</option>
+                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Rascunho</option>
+                </select>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label">Categoria</label>
+                <select class="form-select" name="category">
+                    <option value="">Todas</option>
+                    @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+            @if($authors->isNotEmpty())
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label">Autor</label>
+                <select class="form-select" name="author">
+                    <option value="">Todos</option>
+                    @foreach($authors as $a)
+                    <option value="{{ $a->id }}" {{ (string) request('author') === (string) $a->id ? 'selected' : '' }}>
+                        {{ $a->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
         </div>
-        <div class="col-md-3">
-            <label class="form-label">Status</label>
-            <select class="form-select" name="status">
-                <option value="">Todos</option>
-                <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publicado</option>
-                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Rascunho</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Categoria</label>
-            <select class="form-select" name="category">
-                <option value="">Todas</option>
-                @foreach($categories as $category)
-                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                    {{ $category->name }}
-                </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-outline-primary w-100">
-                <i class="bi bi-funnel me-1"></i>Filtrar
-            </button>
+
+        <div class="row g-3 mt-1 align-items-end">
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label">Publicação a partir de</label>
+                <input type="date" class="form-control" name="published_from" value="{{ request('published_from') }}">
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label">Publicação até</label>
+                <input type="date" class="form-control" name="published_to" value="{{ request('published_to') }}">
+            </div>
+            <div class="col-md-6 col-lg-3 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-funnel me-1"></i>Filtrar
+                </button>
+                <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">Limpar</a>
+            </div>
         </div>
     </form>
 </div>
@@ -90,11 +119,25 @@
             <thead>
                 <tr>
                     <th style="width: 60px;">Imagem</th>
-                    <th>Título</th>
+                    <th style="max-width: 280px;">Título</th>
                     <th>Categoria</th>
                     <th>Autor</th>
                     <th>Status</th>
-                    <th>Data</th>
+                    <th style="min-width: 140px;">
+                        @php
+                            $dirNow = request('dir', 'desc') === 'asc' ? 'asc' : 'desc';
+                            $dirToggle = $dirNow === 'desc' ? 'asc' : 'desc';
+                            $sortQuery = array_merge(request()->except('page'), ['dir' => $dirToggle]);
+                        @endphp
+                        <a href="{{ route('admin.posts.index', $sortQuery) }}" class="text-reset text-decoration-none d-inline-flex align-items-center gap-1">
+                            Data publicação
+                            @if($dirNow === 'desc')
+                                <i class="bi bi-sort-down" title="Mais recentes primeiro"></i>
+                            @else
+                                <i class="bi bi-sort-up" title="Mais antigos primeiro"></i>
+                            @endif
+                        </a>
+                    </th>
                     <th>Visualizações</th>
                     <th style="width: 120px;">Ações</th>
                 </tr>
@@ -106,10 +149,11 @@
                         <img src="{{ $post->featured_image ?? 'https://via.placeholder.com/60x60' }}" 
                              class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
                     </td>
-                    <td>
-                        <strong>{{ \Illuminate\Support\Str::limit($post->title, 50) }}</strong>
-                        <br>
-                        <small class="text-muted">{{ \Illuminate\Support\Str::limit($post->excerpt, 60) }}</small>
+                    <td class="align-middle" style="max-width: 280px;">
+                        <div class="small">
+                            <strong class="d-block mb-0" style="font-size: 0.8125rem; line-height: 1.25;">{{ \Illuminate\Support\Str::limit($post->title, 40) }}</strong>
+                            <span class="text-muted d-block" style="font-size: 0.72rem; line-height: 1.3;">{{ \Illuminate\Support\Str::limit($post->excerpt, 48) }}</span>
+                        </div>
                     </td>
                     <td>
                         <span class="badge bg-secondary">{{ $post->category->name }}</span>
@@ -123,7 +167,7 @@
                         </span>
                     </td>
                     <td>
-                        <small>{{ $post->published_at ? $post->published_at->format('d/m/Y') : '-' }}</small>
+                        <small>{{ $post->published_at ? $post->published_at->format('d/m/Y') : '—' }}</small>
                     </td>
                     <td>
                         <span class="badge bg-info">
@@ -164,4 +208,3 @@
     </div>
 </div>
 @endsection
-

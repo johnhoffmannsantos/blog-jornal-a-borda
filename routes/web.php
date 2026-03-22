@@ -10,6 +10,7 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\AdminPostIndexController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
@@ -51,8 +52,9 @@ Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'index'])->name('profile');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     
-    // Posts
-    Route::resource('posts', AdminPostController::class);
+    // Posts (listagem com filtros em controller dedicado)
+    Route::get('posts', AdminPostIndexController::class)->name('posts.index');
+    Route::resource('posts', AdminPostController::class)->except(['index']);
     
     // Categories
     Route::resource('categories', AdminCategoryController::class);
