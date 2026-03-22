@@ -3,16 +3,102 @@
 @section('title', 'Posts - Painel Administrativo')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center">
+@php
+    $activeFilterKeys = collect(['search', 'status', 'category', 'author', 'published_from', 'published_to'])
+        ->filter(fn ($k) => filled(request($k)));
+    $activeFilterCount = $activeFilterKeys->count();
+@endphp
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3">
     <div>
         <h1>
             <i class="bi bi-file-text me-2"></i>Posts
         </h1>
-        <p>Gerencie todos os seus posts</p>
+        <p class="mb-0">Gerencie todos os seus posts</p>
     </div>
-    <a href="{{ route('admin.posts.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-2"></i>Novo Post
-    </a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#postsFiltersOffcanvas" aria-controls="postsFiltersOffcanvas">
+            <i class="bi bi-sliders me-1"></i>Filtrar
+            @if($activeFilterCount > 0)
+                <span class="badge bg-primary ms-1">{{ $activeFilterCount }}</span>
+            @endif
+        </button>
+        <a href="{{ route('admin.posts.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Novo Post
+        </a>
+    </div>
+</div>
+
+{{-- Offcanvas filtros --}}
+<div class="offcanvas offcanvas-start bg-white" tabindex="-1" id="postsFiltersOffcanvas" aria-labelledby="postsFiltersOffcanvasLabel" style="--bs-offcanvas-width: min(420px, 100vw);">
+    <div class="offcanvas-header border-bottom bg-white">
+        <div>
+            <h5 class="offcanvas-title fw-semibold" id="postsFiltersOffcanvasLabel">
+                <i class="bi bi-funnel me-2 text-primary"></i>Filtrar posts
+            </h5>
+            <p class="small text-muted mb-0">Refine a listagem por texto, status, datas e mais.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="GET" action="{{ route('admin.posts.index') }}" id="postsFiltersForm">
+            <input type="hidden" name="dir" value="{{ request('dir', 'desc') }}">
+
+            <div class="mb-3">
+                <label class="form-label fw-medium">Buscar</label>
+                <input type="text" class="form-control" name="search"
+                       value="{{ request('search') }}" placeholder="Título do post...">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-medium">Status</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publicado</option>
+                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Rascunho</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-medium">Categoria</label>
+                <select class="form-select" name="category">
+                    <option value="">Todas</option>
+                    @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+            @if($authors->isNotEmpty())
+            <div class="mb-3">
+                <label class="form-label fw-medium">Autor</label>
+                <select class="form-select" name="author">
+                    <option value="">Todos</option>
+                    @foreach($authors as $a)
+                    <option value="{{ $a->id }}" {{ (string) request('author') === (string) $a->id ? 'selected' : '' }}>
+                        {{ $a->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
+            <hr class="my-4 opacity-25">
+            <p class="small text-uppercase text-muted fw-semibold mb-3">Data de publicação</p>
+            <div class="mb-3">
+                <label class="form-label">A partir de</label>
+                <input type="date" class="form-control" name="published_from" value="{{ request('published_from') }}">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Até</label>
+                <input type="date" class="form-control" name="published_to" value="{{ request('published_to') }}">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check2-circle me-1"></i>Aplicar filtros
+                </button>
+                <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">Limpar tudo</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 {{-- Mensagens serão exibidas via Toast --}}
@@ -46,70 +132,6 @@
             <p class="stat-label">Rascunhos</p>
         </div>
     </div>
-</div>
-
-<!-- Filtros -->
-<div class="admin-card mb-4">
-    <form method="GET" action="{{ route('admin.posts.index') }}">
-        <input type="hidden" name="dir" value="{{ request('dir', 'desc') }}">
-
-        <div class="row g-3">
-            <div class="col-md-6 col-lg-4">
-                <label class="form-label">Buscar</label>
-                <input type="text" class="form-control" name="search" 
-                       value="{{ request('search') }}" placeholder="Título do post...">
-            </div>
-            <div class="col-md-6 col-lg-2">
-                <label class="form-label">Status</label>
-                <select class="form-select" name="status">
-                    <option value="">Todos</option>
-                    <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publicado</option>
-                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Rascunho</option>
-                </select>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label">Categoria</label>
-                <select class="form-select" name="category">
-                    <option value="">Todas</option>
-                    @foreach($categories as $category)
-                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            @if($authors->isNotEmpty())
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label">Autor</label>
-                <select class="form-select" name="author">
-                    <option value="">Todos</option>
-                    @foreach($authors as $a)
-                    <option value="{{ $a->id }}" {{ (string) request('author') === (string) $a->id ? 'selected' : '' }}>
-                        {{ $a->name }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            @endif
-        </div>
-
-        <div class="row g-3 mt-1 align-items-end">
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label">Publicação a partir de</label>
-                <input type="date" class="form-control" name="published_from" value="{{ request('published_from') }}">
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label">Publicação até</label>
-                <input type="date" class="form-control" name="published_to" value="{{ request('published_to') }}">
-            </div>
-            <div class="col-md-6 col-lg-3 d-flex gap-2">
-                <button type="submit" class="btn btn-outline-primary">
-                    <i class="bi bi-funnel me-1"></i>Filtrar
-                </button>
-                <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">Limpar</a>
-            </div>
-        </div>
-    </form>
 </div>
 
 <!-- Lista de Posts -->
