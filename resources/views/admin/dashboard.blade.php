@@ -73,7 +73,7 @@
                         <h6 class="mb-1">{{ \Illuminate\Support\Str::limit($post->title, 50) }}</h6>
                         <small class="text-muted">
                             <i class="bi bi-person me-1"></i>{{ $post->author->name }} • 
-                            <i class="bi bi-calendar3 me-1"></i>{{ $post->published_at->format('d/m/Y') }}
+                            <i class="bi bi-calendar3 me-1"></i>{{ ($post->published_at ?? $post->created_at)->format('d/m/Y') }}
                         </small>
                     </div>
                     <div class="flex-shrink-0">
