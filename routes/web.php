@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\JournalEditionController as AdminJournalEditionController;
 use App\Http\Controllers\JournalEditionController;
 use App\Http\Controllers\Admin\SettingsController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -86,6 +87,33 @@ Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     Route::get('/configuracoes', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/configuracoes', [SettingsController::class, 'update'])->name('settings.update');
     Route::post('/configuracoes/test-email', [SettingsController::class, 'testEmail'])->name('settings.testEmail');
+
+    Route::post('/configuracoes/cron/publicar-agendados', function () {
+        if (! auth()->user()->isAdmin()) {
+            abort(403);
+        }
+        Artisan::call('posts:publish-scheduled');
+        $output = trim(Artisan::output()) ?: 'Comando concluído.';
+
+        return redirect()
+            ->route('admin.settings.index')
+            ->with('active_settings_tab', 'cron')
+            ->with('success', $output);
+    })->name('settings.cron.publish');
+
+    Route::post('/configuracoes/cron/schedule-list', function () {
+        if (! auth()->user()->isAdmin()) {
+            abort(403);
+        }
+        Artisan::call('schedule:list');
+        $output = trim(Artisan::output()) ?: '(sem saída)';
+
+        return redirect()
+            ->route('admin.settings.index')
+            ->with('active_settings_tab', 'cron')
+            ->with('cron_schedule_output', $output)
+            ->with('success', 'Lista de tarefas agendadas gerada abaixo.');
+    })->name('settings.cron.scheduleList');
 });
 
 // Post Comment Route (must be before catch-all post route)

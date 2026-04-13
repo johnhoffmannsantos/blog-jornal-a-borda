@@ -419,7 +419,7 @@
             
             forms.forEach(function(form) {
                 // Pular formulários que já têm validação customizada
-                if (form.id === 'journalEditionForm' || form.id === 'settingsForm' || form.id === 'avatarForm' || form.id === 'partnerForm') {
+                if (form.id === 'journalEditionForm' || form.id === 'settingsForm' || form.id === 'avatarForm' || form.id === 'partnerForm' || form.id === 'cronPublishForm' || form.id === 'cronScheduleListForm' || form.id === 'testEmailForm') {
                     return;
                 }
                 

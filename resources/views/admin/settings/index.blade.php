@@ -3,6 +3,9 @@
 @section('title', 'Configurações - Painel Administrativo')
 
 @section('content')
+@php
+    $activeTab = session('active_settings_tab', 'site');
+@endphp
 <div class="page-header">
     <h1>
         <i class="bi bi-gear me-2"></i>Configurações
@@ -16,34 +19,40 @@
     <!-- Tabs Navigation -->
     <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="site-tab" data-bs-toggle="tab" data-bs-target="#site" 
-                    type="button" role="tab" aria-controls="site" aria-selected="true">
+            <button class="nav-link {{ $activeTab === 'site' ? 'active' : '' }}" id="site-tab" data-bs-toggle="tab" data-bs-target="#site" 
+                    type="button" role="tab" aria-controls="site" aria-selected="{{ $activeTab === 'site' ? 'true' : 'false' }}">
                 <i class="bi bi-globe me-2"></i>Configurações do Site
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="social-tab" data-bs-toggle="tab" data-bs-target="#social" 
-                    type="button" role="tab" aria-controls="social" aria-selected="false">
+            <button class="nav-link {{ $activeTab === 'social' ? 'active' : '' }}" id="social-tab" data-bs-toggle="tab" data-bs-target="#social" 
+                    type="button" role="tab" aria-controls="social" aria-selected="{{ $activeTab === 'social' ? 'true' : 'false' }}">
                 <i class="bi bi-share me-2"></i>Redes Sociais
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="smtp-tab" data-bs-toggle="tab" data-bs-target="#smtp" 
-                    type="button" role="tab" aria-controls="smtp" aria-selected="false">
+            <button class="nav-link {{ $activeTab === 'smtp' ? 'active' : '' }}" id="smtp-tab" data-bs-toggle="tab" data-bs-target="#smtp" 
+                    type="button" role="tab" aria-controls="smtp" aria-selected="{{ $activeTab === 'smtp' ? 'true' : 'false' }}">
                 <i class="bi bi-envelope me-2"></i>Configurações SMTP
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {{ $activeTab === 'cron' ? 'active' : '' }}" id="cron-tab" data-bs-toggle="tab" data-bs-target="#cron" 
+                    type="button" role="tab" aria-controls="cron" aria-selected="{{ $activeTab === 'cron' ? 'true' : 'false' }}">
+                <i class="bi bi-clock-history me-2"></i>Cron / agendador
             </button>
         </li>
     </ul>
 
-    <!-- Form único para todas as configurações -->
+    <div class="tab-content" id="settingsTabsContent">
+
+    <!-- Form: site, redes e SMTP (aba Cron usa POSTs separados) -->
     <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" id="settingsForm">
         @csrf
         @method('PUT')
 
-        <!-- Tabs Content -->
-        <div class="tab-content" id="settingsTabsContent">
             <!-- Tab 1: Configurações do Site -->
-            <div class="tab-pane fade show active" id="site" role="tabpanel" aria-labelledby="site-tab">
+            <div class="tab-pane fade {{ $activeTab === 'site' ? 'show active' : '' }}" id="site" role="tabpanel" aria-labelledby="site-tab">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="site_name" class="form-label fw-semibold">Nome do Site *</label>
@@ -95,7 +104,7 @@
             </div>
 
             <!-- Tab 2: Redes Sociais -->
-            <div class="tab-pane fade" id="social" role="tabpanel" aria-labelledby="social-tab">
+            <div class="tab-pane fade {{ $activeTab === 'social' ? 'show active' : '' }}" id="social" role="tabpanel" aria-labelledby="social-tab">
                 <div class="alert alert-info mb-4">
                     <i class="bi bi-info-circle me-2"></i>
                     <strong>Informação:</strong> Configure os links das redes sociais. Apenas as redes com links configurados aparecerão no site.
@@ -197,7 +206,7 @@
             </div>
 
             <!-- Tab 3: Configurações SMTP -->
-            <div class="tab-pane fade" id="smtp" role="tabpanel" aria-labelledby="smtp-tab">
+            <div class="tab-pane fade {{ $activeTab === 'smtp' ? 'show active' : '' }}" id="smtp" role="tabpanel" aria-labelledby="smtp-tab">
                 <div class="alert alert-info mb-4">
                     <i class="bi bi-info-circle me-2"></i>
                     <strong>Importante:</strong> Configure as credenciais SMTP para envio de emails. Deixe a senha em branco para manter a atual.
@@ -320,9 +329,8 @@
                     </small>
                 </div>
             </div>
-        </div>
 
-        <!-- Botão Salvar (fora das abas, sempre visível) -->
+        <!-- Botão Salvar (dentro do formulário principal) -->
         <div class="d-flex justify-content-end mt-4 pt-3 border-top">
             <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-arrow-left me-2"></i>Voltar
@@ -332,6 +340,56 @@
             </button>
         </div>
     </form>
+
+            <!-- Tab 4: Cron / agendador Laravel -->
+            <div class="tab-pane fade {{ $activeTab === 'cron' ? 'show active' : '' }}" id="cron" role="tabpanel" aria-labelledby="cron-tab">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    O servidor precisa executar <code>php artisan schedule:run</code> a cada minuto (ex.: crontab).
+                    Se a “última publicação agendada” não atualizar sozinha, o cron do sistema não está chamando o Laravel.
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-semibold mb-2">Última execução do job de posts agendados</h6>
+                        <p class="mb-0 text-muted small">
+                            @if(!empty($cronLastPublish))
+                                <span class="text-dark fw-medium">{{ \Carbon\Carbon::parse($cronLastPublish)->timezone(config('app.timezone'))->format('d/m/Y H:i:s') }}</span>
+                            @else
+                                Ainda não registrado (rode o comando manualmente ou aguarde o cron).
+                            @endif
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-semibold mb-2">Posts com status “agendado” pendentes</h6>
+                        <p class="mb-0"><span class="badge bg-secondary fs-6">{{ $scheduledPendingCount ?? 0 }}</span></p>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <form method="POST" action="{{ route('admin.settings.cron.publish') }}" class="d-inline" id="cronPublishForm">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-play-circle me-1"></i>Publicar agendados agora
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.settings.cron.scheduleList') }}" class="d-inline" id="cronScheduleListForm">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-list-task me-1"></i>Ver <code>schedule:list</code>
+                        </button>
+                    </form>
+                </div>
+
+                @if(session('cron_schedule_output'))
+                <div class="mb-0">
+                    <label class="form-label fw-semibold">Saída de <code>schedule:list</code></label>
+                    <pre class="bg-light border rounded p-3 small mb-0" style="max-height: 320px; overflow: auto;">{{ session('cron_schedule_output') }}</pre>
+                </div>
+                @endif
+            </div>
+
+    </div>
 </div>
 
 @push('scripts')
