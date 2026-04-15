@@ -55,6 +55,7 @@
                 <select class="form-select" name="status">
                     <option value="">Todos</option>
                     <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publicado</option>
+                    <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>Agendado</option>
                     <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Rascunho</option>
                 </select>
             </div>
@@ -106,7 +107,7 @@
 
 <!-- Cards de Estatísticas -->
 <div class="row g-2 g-md-3 mb-3">
-    <div class="col-md-4">
+    <div class="col-6 col-md-3">
         <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                 <i class="bi bi-file-text"></i>
@@ -115,7 +116,7 @@
             <p class="stat-label">Total de Posts</p>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-6 col-md-3">
         <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-success bg-opacity-10 text-success">
                 <i class="bi bi-check-circle"></i>
@@ -124,7 +125,16 @@
             <p class="stat-label">Publicados</p>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-compact">
+            <div class="stat-icon bg-info bg-opacity-10 text-info">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <div class="stat-value">{{ $stats['scheduled'] ?? 0 }}</div>
+            <p class="stat-label">Agendados</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
         <div class="stat-card stat-card-compact">
             <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                 <i class="bi bi-file-earmark"></i>
@@ -185,12 +195,23 @@
                         <small>{{ $post->author->name }}</small>
                     </td>
                     <td>
-                        <span class="badge bg-{{ $post->status === 'published' ? 'success' : 'warning' }}">
-                            {{ $post->status === 'published' ? 'Publicado' : 'Rascunho' }}
-                        </span>
+                        @php
+                            $rowStatus = match ($post->status) {
+                                'published' => ['success', 'Publicado'],
+                                'scheduled' => ['info', 'Agendado'],
+                                default => ['warning', 'Rascunho'],
+                            };
+                        @endphp
+                        <span class="badge bg-{{ $rowStatus[0] }}">{{ $rowStatus[1] }}</span>
                     </td>
                     <td>
-                        <small>{{ $post->published_at ? $post->published_at->format('d/m/Y') : '—' }}</small>
+                        <small>
+                            @if($post->published_at)
+                                {{ $post->published_at->format('d/m/Y H:i') }}
+                            @else
+                                —
+                            @endif
+                        </small>
                     </td>
                     <td>
                         <span class="badge badge-sidebar">

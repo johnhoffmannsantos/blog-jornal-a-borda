@@ -33,7 +33,7 @@ class AdminPostIndexController extends Controller
 
         $rules = [
             'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', 'in:published,draft'],
+            'status' => ['nullable', 'in:published,draft,scheduled'],
             'category' => ['nullable', 'integer', 'exists:categories,id'],
             'published_from' => ['nullable', 'date'],
             'published_to' => ['nullable', 'date'],
@@ -54,6 +54,7 @@ class AdminPostIndexController extends Controller
         $stats = [
             'total' => (clone $statsQuery)->count(),
             'published' => (clone $statsQuery)->where('status', 'published')->count(),
+            'scheduled' => (clone $statsQuery)->where('status', 'scheduled')->count(),
             'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
         ];
 

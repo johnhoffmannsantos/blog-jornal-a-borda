@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Tag;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -68,43 +70,75 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $status = $request->input('status');
+
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['required', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'category_id' => ['required', 'exists:categories,id'],
             'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
-            'status' => ['required', 'in:draft,published'],
-            'published_at' => ['nullable', 'date'],
+            'status' => ['required', 'in:draft,scheduled,published'],
+            'published_at_date' => ['nullable', 'date'],
+            'published_at_time' => ['nullable', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'tags' => ['nullable', 'array'],
             'author_id' => ['nullable', 'exists:users,id'],
-        ]);
+        ];
+
+        if ($status === 'scheduled') {
+            $rules['published_at_date'] = ['required', 'date'];
+            $rules['published_at_time'] = ['required', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $publishedAt = $this->parsedPublishedAtFromDateAndTime($request);
+
+        if ($validated['status'] === 'published') {
+            $publishedAt = $publishedAt ?? Carbon::now(config('app.timezone'));
+        }
+
+        if ($validated['status'] === 'draft') {
+            $publishedAt = null;
+        }
+
+        if ($validated['status'] === 'scheduled') {
+            if (! $publishedAt || ! $publishedAt->isFuture()) {
+                throw ValidationException::withMessages([
+                    'published_at_date' => 'Informe data e hora no futuro para agendar a publicação.',
+                ]);
+            }
+        }
+
+        if ($validated['status'] === 'published' && $publishedAt && $publishedAt->isFuture()) {
+            throw ValidationException::withMessages([
+                'published_at_date' => 'Para publicar no futuro, use o status Agendado.',
+            ]);
+        }
 
         $featuredImage = null;
 
-        // Processar upload de imagem se houver
         if ($request->hasFile('featured_image_file')) {
             $file = $request->file('featured_image_file');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs('posts/featured', $filename, 'public');
             $featuredImage = Storage::disk('public')->url($path);
         }
 
-        // Determinar o autor: se for ADMIN e forneceu author_id, usar; senão usar o usuário logado
-        $authorId = Auth::user()->isAdmin() && isset($validated['author_id']) && $validated['author_id'] 
-            ? $validated['author_id'] 
+        $authorId = Auth::user()->isAdmin() && isset($validated['author_id']) && $validated['author_id']
+            ? $validated['author_id']
             : Auth::id();
 
         $post = Post::create([
             'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']),
+            'slug' => $this->uniquePostSlug($validated['title']),
             'excerpt' => $validated['excerpt'],
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
             'author_id' => $authorId,
             'featured_image' => $featuredImage,
             'status' => $validated['status'],
-            'published_at' => $validated['published_at'] ?? ($validated['status'] === 'published' ? now() : null),
+            'published_at' => $publishedAt,
         ]);
 
         if ($request->has('tags')) {
@@ -152,37 +186,68 @@ class PostController extends Controller
             abort(403, 'Você não tem permissão para editar este post.');
         }
 
-        $validated = $request->validate([
+        $status = $request->input('status');
+
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['required', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'category_id' => ['required', 'exists:categories,id'],
             'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
-            'status' => ['required', 'in:draft,published'],
-            'published_at' => ['nullable', 'date'],
+            'status' => ['required', 'in:draft,scheduled,published'],
+            'published_at_date' => ['nullable', 'date'],
+            'published_at_time' => ['nullable', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'tags' => ['nullable', 'array'],
             'author_id' => ['nullable', 'exists:users,id'],
-        ]);
+        ];
+
+        if ($status === 'scheduled') {
+            $rules['published_at_date'] = ['required', 'date'];
+            $rules['published_at_time'] = ['required', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $publishedAt = $this->parsedPublishedAtFromDateAndTime($request);
+
+        if ($validated['status'] === 'published') {
+            $publishedAt = $publishedAt ?? $post->published_at ?? Carbon::now(config('app.timezone'));
+        }
+
+        if ($validated['status'] === 'draft') {
+            $publishedAt = null;
+        }
+
+        if ($validated['status'] === 'scheduled') {
+            if (! $publishedAt || ! $publishedAt->isFuture()) {
+                throw ValidationException::withMessages([
+                    'published_at_date' => 'Informe data e hora no futuro para agendar a publicação.',
+                ]);
+            }
+        }
+
+        if ($validated['status'] === 'published' && $publishedAt && $publishedAt->isFuture()) {
+            throw ValidationException::withMessages([
+                'published_at_date' => 'Para publicar no futuro, use o status Agendado.',
+            ]);
+        }
 
         $featuredImage = $post->featured_image;
 
-        // Processar upload de imagem se houver
         if ($request->hasFile('featured_image_file')) {
-            // Deletar imagem antiga se existir e for do nosso storage
             if ($post->featured_image && str_contains($post->featured_image, '/storage/posts/featured/')) {
                 $oldPath = str_replace(Storage::disk('public')->url(''), '', $post->featured_image);
                 if (Storage::disk('public')->exists($oldPath)) {
                     Storage::disk('public')->delete($oldPath);
                 }
             }
-            
+
             $file = $request->file('featured_image_file');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs('posts/featured', $filename, 'public');
             $featuredImage = Storage::disk('public')->url($path);
         }
 
-        // Determinar o autor: se for ADMIN e forneceu author_id, usar; senão manter o autor atual
         $authorId = $post->author_id;
         if (Auth::user()->isAdmin() && isset($validated['author_id']) && $validated['author_id']) {
             $authorId = $validated['author_id'];
@@ -190,14 +255,14 @@ class PostController extends Controller
 
         $post->update([
             'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']),
+            'slug' => $this->uniquePostSlug($validated['title'], $post->id),
             'excerpt' => $validated['excerpt'],
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
             'author_id' => $authorId,
             'featured_image' => $featuredImage,
             'status' => $validated['status'],
-            'published_at' => $validated['published_at'] ?? ($validated['status'] === 'published' && !$post->published_at ? now() : $post->published_at),
+            'published_at' => $publishedAt,
         ]);
 
         if ($request->has('tags')) {
@@ -221,5 +286,46 @@ class PostController extends Controller
         $post->delete();
 
         return redirect()->route('admin.posts.index')->with('success', 'Post excluído com sucesso!');
+    }
+
+    private function uniquePostSlug(string $title, ?int $ignorePostId = null): string
+    {
+        $base = Str::slug($title);
+        if ($base === '') {
+            $base = 'post';
+        }
+        $base = Str::limit($base, 220, '');
+
+        $candidate = $base;
+        $n = 2;
+        while (Post::query()
+            ->where('slug', $candidate)
+            ->when($ignorePostId !== null, fn ($q) => $q->where('id', '!=', $ignorePostId))
+            ->exists()) {
+            $suffix = '-'.$n;
+            $n++;
+            $candidate = Str::limit($base, 255 - strlen($suffix), '').$suffix;
+        }
+
+        return $candidate;
+    }
+
+    private function parsedPublishedAtFromDateAndTime(Request $request): ?Carbon
+    {
+        if (! $request->filled('published_at_date')) {
+            return null;
+        }
+
+        $time = $request->input('published_at_time', '00:00');
+        $time = is_string($time) ? preg_replace('/\s+/', '', substr($time, 0, 5)) : '00:00';
+        if (! preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time)) {
+            $time = '00:00';
+        }
+
+        try {
+            return Carbon::parse($request->published_at_date.' '.$time.':00', config('app.timezone'));
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

@@ -16,6 +16,11 @@
 {{-- Mensagens serão exibidas via Toast --}}
 
 <div class="admin-card">
+    {{-- Formulários separados: HTML não permite <form> dentro de <form>; botões/inputs usam atributo form="" --}}
+    <form id="testEmailForm" method="POST" action="{{ route('admin.settings.testEmail') }}" class="d-none" tabindex="-1" aria-hidden="true">@csrf</form>
+    <form id="cronPublishForm" method="POST" action="{{ route('admin.settings.cron.publish') }}" class="d-none" tabindex="-1" aria-hidden="true">@csrf</form>
+    <form id="cronScheduleListForm" method="POST" action="{{ route('admin.settings.cron.scheduleList') }}" class="d-none" tabindex="-1" aria-hidden="true">@csrf</form>
+
     <!-- Tabs Navigation -->
     <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -44,12 +49,11 @@
         </li>
     </ul>
 
-    <div class="tab-content" id="settingsTabsContent">
-
-    <!-- Form: site, redes e SMTP (aba Cron usa POSTs separados) -->
     <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" id="settingsForm">
         @csrf
         @method('PUT')
+
+    <div class="tab-content" id="settingsTabsContent">
 
             <!-- Tab 1: Configurações do Site -->
             <div class="tab-pane fade {{ $activeTab === 'site' ? 'show active' : '' }}" id="site" role="tabpanel" aria-labelledby="site-tab">
@@ -312,34 +316,22 @@
                     <h6 class="mb-3">
                         <i class="bi bi-send me-2"></i>Testar Configuração de Email
                     </h6>
-                    <form method="POST" action="{{ route('admin.settings.testEmail') }}" class="row" id="testEmailForm">
-                        @csrf
+                    <div class="row g-2 align-items-end">
                         <div class="col-md-8">
-                            <input type="email" class="form-control" name="test_email" 
+                            <input type="email" class="form-control" name="test_email" form="testEmailForm"
                                    placeholder="Digite um email para testar o envio">
                         </div>
                         <div class="col-md-4">
-                            <button type="submit" class="btn btn-outline-primary w-100">
+                            <button type="submit" form="testEmailForm" class="btn btn-outline-primary w-100">
                                 <i class="bi bi-send me-2"></i>Enviar Email de Teste
                             </button>
                         </div>
-                    </form>
+                    </div>
                     <small class="text-muted d-block mt-2">
                         <i class="bi bi-info-circle me-1"></i>Um email de teste será enviado para verificar se as configurações SMTP estão corretas.
                     </small>
                 </div>
             </div>
-
-        <!-- Botão Salvar (dentro do formulário principal) -->
-        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary me-2">
-                <i class="bi bi-arrow-left me-2"></i>Voltar
-            </a>
-            <button type="submit" id="saveSettingsBtn" class="btn btn-primary btn-lg" onclick="return handleSettingsSubmit(event)">
-                <i class="bi bi-save me-2"></i>Salvar Todas as Configurações
-            </button>
-        </div>
-    </form>
 
             <!-- Tab 4: Cron / agendador Laravel -->
             <div class="tab-pane fade {{ $activeTab === 'cron' ? 'show active' : '' }}" id="cron" role="tabpanel" aria-labelledby="cron-tab">
@@ -367,18 +359,12 @@
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mb-4">
-                    <form method="POST" action="{{ route('admin.settings.cron.publish') }}" class="d-inline" id="cronPublishForm">
-                        @csrf
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-play-circle me-1"></i>Publicar agendados agora
-                        </button>
-                    </form>
-                    <form method="POST" action="{{ route('admin.settings.cron.scheduleList') }}" class="d-inline" id="cronScheduleListForm">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-primary">
-                            <i class="bi bi-list-task me-1"></i>Ver <code>schedule:list</code>
-                        </button>
-                    </form>
+                    <button type="submit" form="cronPublishForm" class="btn btn-primary">
+                        <i class="bi bi-play-circle me-1"></i>Publicar agendados agora
+                    </button>
+                    <button type="submit" form="cronScheduleListForm" class="btn btn-outline-primary">
+                        <i class="bi bi-list-task me-1"></i>Ver <code>schedule:list</code>
+                    </button>
                 </div>
 
                 @if(session('cron_schedule_output'))
@@ -390,6 +376,18 @@
             </div>
 
     </div>
+
+        <!-- Botão Salvar: fora do .tab-content para os .tab-pane serem filhos diretos (regra Bootstrap display:none) -->
+        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+            <button type="submit" id="saveSettingsBtn" class="btn btn-primary btn-lg" onclick="return handleSettingsSubmit(event)">
+                <i class="bi bi-save me-2"></i>Salvar Todas as Configurações
+            </button>
+        </div>
+    </form>
+
 </div>
 
 @push('scripts')
@@ -488,7 +486,7 @@
     }
 
     .nav-tabs .nav-link {
-        color: var(--text-light);
+        color: #495057;
         border: none;
         border-bottom: 3px solid transparent;
         padding: 12px 20px;
@@ -511,8 +509,14 @@
         padding: 20px 0;
     }
 
-    .tab-pane {
-        animation: fadeIn 0.3s;
+    /* Só anima o painel visível; reforço caso algum CSS global interfira no display das abas */
+    #settingsTabsContent > .tab-pane:not(.active) {
+        display: none !important;
+    }
+
+    #settingsTabsContent > .tab-pane.active {
+        display: block !important;
+        animation: fadeIn 0.3s ease-out;
     }
 
     @keyframes fadeIn {

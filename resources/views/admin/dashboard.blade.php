@@ -77,9 +77,14 @@
                         </small>
                     </div>
                     <div class="flex-shrink-0">
-                        <span class="badge bg-{{ $post->status === 'published' ? 'success' : 'warning' }}">
-                            {{ $post->status === 'published' ? 'Publicado' : 'Rascunho' }}
-                        </span>
+                        @php
+                            $dashStatus = match ($post->status) {
+                                'published' => ['success', 'Publicado'],
+                                'scheduled' => ['info', 'Agendado'],
+                                default => ['warning', 'Rascunho'],
+                            };
+                        @endphp
+                        <span class="badge bg-{{ $dashStatus[0] }}">{{ $dashStatus[1] }}</span>
                     </div>
                 </div>
                 @empty

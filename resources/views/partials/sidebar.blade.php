@@ -1,5 +1,7 @@
 @php
     $popularPosts = \App\Models\Post::where('status', 'published')
+        ->whereNotNull('published_at')
+        ->where('published_at', '<=', now())
         ->orderBy('views', 'desc')
         ->take(5)
         ->get();

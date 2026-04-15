@@ -15,6 +15,8 @@ class CategoryController extends Controller
         $posts = Post::with(['author', 'category', 'tags'])
             ->where('category_id', $category->id)
             ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 

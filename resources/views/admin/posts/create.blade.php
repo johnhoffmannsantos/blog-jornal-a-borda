@@ -83,16 +83,19 @@
                     </h5>
                 </div>
                 
+                @php
+                    $pubDate = old('published_at_date', now()->format('Y-m-d'));
+                    $pubTime = old('published_at_time', now()->format('H:i'));
+                    $oldStatus = old('status', 'draft');
+                @endphp
+
                 <div class="mb-3">
                     <label for="status" class="form-label fw-semibold">Status *</label>
                     <select class="form-select @error('status') is-invalid @enderror" 
                             id="status" name="status" required>
-                        <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>
-                            <i class="bi bi-file-earmark"></i> Rascunho
-                        </option>
-                        <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>
-                            <i class="bi bi-check-circle"></i> Publicado
-                        </option>
+                        <option value="draft" {{ $oldStatus === 'draft' ? 'selected' : '' }}>Rascunho</option>
+                        <option value="scheduled" {{ $oldStatus === 'scheduled' ? 'selected' : '' }}>Agendado</option>
+                        <option value="published" {{ $oldStatus === 'published' ? 'selected' : '' }}>Publicado</option>
                     </select>
                     @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -118,14 +121,30 @@
                 </div>
                 @endif
 
-                <div class="mb-3">
-                    <label for="published_at" class="form-label fw-semibold">Data de Publicação</label>
-                    <input type="datetime-local" class="form-control @error('published_at') is-invalid @enderror" 
-                           id="published_at" name="published_at" value="{{ old('published_at') }}">
-                    <small class="text-muted">Deixe em branco para publicar agora (se status = Publicado)</small>
-                    @error('published_at')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="mb-3" id="publishedAtFields">
+                    <span class="form-label fw-semibold d-block mb-2">Data e hora de publicação</span>
+                    <div class="row g-2">
+                        <div class="col-md-7">
+                            <label for="published_at_date" class="form-label small text-muted mb-0">Data</label>
+                            <input type="date" class="form-control @error('published_at_date') is-invalid @enderror"
+                                   id="published_at_date" name="published_at_date" value="{{ $pubDate }}">
+                            @error('published_at_date')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-5">
+                            <label for="published_at_time" class="form-label small text-muted mb-0">Horário (24 h)</label>
+                            <input type="text" class="form-control @error('published_at_time') is-invalid @enderror"
+                                   id="published_at_time" name="published_at_time" value="{{ $pubTime }}"
+                                   placeholder="14:30" maxlength="5" inputmode="numeric" autocomplete="off"
+                                   pattern="([01][0-9]|2[0-3]):[0-5][0-9]"
+                                   title="Horas 00–23 e minutos 00–59 (ex.: 09:05 ou 18:00). Sem AM/PM.">
+                            @error('published_at_time')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Dois campos: data no calendário e hora só em <strong>24 horas</strong> (digite como 14:30). Em <strong>Rascunho</strong> não usa; em <strong>Agendado</strong> precisa ser no futuro.</small>
                 </div>
 
                 <div class="d-grid gap-2">
@@ -374,10 +393,40 @@
         });
     }
 
+    // Status x data/hora de publicação (hora em texto 24 h, sem type=time)
+    const statusEl = document.getElementById('status');
+    const publishedAtDate = document.getElementById('published_at_date');
+    const publishedAtTimeInput = document.getElementById('published_at_time');
+    function normalizeTime24h(el) {
+        if (!el) return;
+        const digits = el.value.replace(/\D/g, '').slice(0, 4);
+        if (digits.length >= 3) {
+            el.value = digits.slice(0, 2) + ':' + digits.slice(2, 4);
+        }
+    }
+    if (publishedAtTimeInput) {
+        publishedAtTimeInput.addEventListener('blur', function() { normalizeTime24h(this); });
+    }
+    function syncPublishFields() {
+        if (!statusEl || !publishedAtDate || !publishedAtTimeInput) return;
+        const status = statusEl.value;
+        publishedAtDate.removeAttribute('required');
+        publishedAtTimeInput.removeAttribute('required');
+        if (status === 'scheduled') {
+            publishedAtDate.setAttribute('required', 'required');
+            publishedAtTimeInput.setAttribute('required', 'required');
+        }
+    }
+    if (statusEl) {
+        statusEl.addEventListener('change', syncPublishFields);
+        syncPublishFields();
+    }
+
     // Validação antes de enviar (TinyMCE esconde o textarea, então não dá para usar required nele)
     const postForm = document.getElementById('postForm');
     if (postForm) {
         postForm.addEventListener('submit', function(e) {
+            normalizeTime24h(document.getElementById('published_at_time'));
             // Primeiro, deixa o browser validar os campos "normais"
             if (!postForm.checkValidity()) {
                 e.preventDefault();

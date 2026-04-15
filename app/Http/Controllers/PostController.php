@@ -14,14 +14,20 @@ class PostController extends Controller
         $post = Post::with(['author', 'category', 'tags', 'comments.replies'])
             ->where('slug', $slug)
             ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->firstOrFail();
 
         $previousPost = Post::where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->where('published_at', '<', $post->published_at)
             ->orderBy('published_at', 'desc')
             ->first();
 
         $nextPost = Post::where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->where('published_at', '>', $post->published_at)
             ->orderBy('published_at', 'asc')
             ->first();
@@ -38,6 +44,8 @@ class PostController extends Controller
     {
         $post = Post::where('slug', $slug)
             ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->firstOrFail();
 
         $validated = $request->validate([
