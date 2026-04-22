@@ -12,252 +12,458 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #1A25FF;
-            --primary-dark: #1419CC;
-            --secondary-color: #4A54FF;
-            --sidebar-bg: #1A25FF;
-            --sidebar-hover: #1419CC;
-            --text-dark: #000000;
-            --text-light: #6c757d;
-            --border-color: #e9ecef;
-            --bg-light: #f8f9fa;
+            --sidebar-width: 264px;
+            --primary-500: #4f46e5;
+            --primary-600: #4338ca;
+            --surface-bg: #f3f4f6;
+            --surface-card: #ffffff;
+            --surface-soft: #f9fafb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06);
+            --shadow-md: 0 8px 30px rgba(17, 24, 39, 0.08);
         }
 
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-light);
-            color: var(--text-dark);
+            background: var(--surface-bg);
+            color: var(--text-main);
             font-size: 14px;
+            line-height: 1.45;
+            overflow-x: hidden;
+            transition: background-color .2s ease, color .2s ease;
         }
 
-        /* Top Bar */
+        .admin-shell {
+            min-height: 100vh;
+        }
+
         .admin-topbar {
-            background: white;
-            border-bottom: 1px solid var(--border-color);
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             position: sticky;
             top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 64px;
+            padding: 10px 18px;
+            border-bottom: 1px solid var(--border-color);
+            background: color-mix(in srgb, var(--surface-card) 92%, transparent);
+            backdrop-filter: blur(8px);
         }
 
         .admin-topbar .logo {
-            font-size: 1.2rem;
+            font-size: 1.06rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--text-main);
             text-decoration: none;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-topbar .logo img {
+            height: 34px;
+            width: auto;
+            max-width: 210px;
+            object-fit: contain;
+        }
+
+        .topbar-action {
+            border: 1px solid var(--border-color);
+            background: var(--surface-card);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s ease;
+        }
+
+        .topbar-action:hover {
+            background: var(--surface-soft);
+            color: var(--primary-500);
         }
 
         .admin-topbar .user-info {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            position: relative;
+        }
+
+        .admin-topbar .user-info .role-badge {
+            margin-top: 3px;
         }
 
         .admin-topbar .user-avatar {
             width: 36px;
             height: 36px;
-            border-radius: 50%;
+            border-radius: 999px;
             border: 2px solid var(--border-color);
         }
 
-        /* Sidebar */
+        .user-menu-btn {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 6px;
+            border-radius: 10px;
+            transition: background-color .15s ease;
+        }
+
+        .user-menu-btn:hover {
+            background: var(--surface-soft);
+        }
+
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            width: 250px;
+            min-width: 220px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--surface-card);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            z-index: 80;
+        }
+
+        .user-menu-item {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            text-decoration: none;
+            background: transparent;
+            border: 0;
+            color: var(--text-main);
+            font-size: .9rem;
+            transition: background-color .15s ease;
+        }
+
+        .user-menu-item:hover {
+            background: var(--surface-soft);
+        }
+
         .admin-sidebar {
-            background: var(--sidebar-bg);
-            color: white;
-            width: 260px;
-            min-height: calc(100vh - 60px);
             position: fixed;
+            top: 64px;
             left: 0;
-            top: 60px;
-            padding: 24px 0;
+            z-index: 50;
+            width: var(--sidebar-width);
+            height: calc(100vh - 64px);
+            background: var(--surface-card);
+            border-right: 1px solid var(--border-color);
             overflow-y: auto;
-        }
-
-        .admin-sidebar .user-card {
-            padding: 0 24px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 16px;
-        }
-
-        .admin-sidebar .user-card img {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.2);
-            margin-bottom: 12px;
-        }
-
-        .admin-sidebar .user-card h6 {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .admin-sidebar .user-card small {
-            color: rgba(255,255,255,0.7);
-            font-size: 12px;
+            transition: transform .24s ease;
         }
 
         .admin-sidebar .nav {
-            padding: 0 12px;
+            padding: 12px 10px 16px;
         }
 
         .admin-sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 12px 16px;
-            border-radius: 8px;
+            color: color-mix(in srgb, var(--text-main) 86%, transparent);
+            padding: 10px 13px;
+            border-radius: 11px;
             margin-bottom: 4px;
-            transition: all 0.2s;
+            transition: all .18s ease;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             text-decoration: none;
+            font-weight: 500;
         }
 
         .admin-sidebar .nav-link:hover {
-            background: var(--sidebar-hover);
-            color: white;
+            background: color-mix(in srgb, var(--primary-500) 10%, var(--surface-card));
+            color: var(--primary-500);
         }
 
         .admin-sidebar .nav-link.active {
-            background: var(--primary-color);
-            color: white;
+            background: color-mix(in srgb, var(--primary-500) 17%, var(--surface-card));
+            color: var(--primary-500);
+            font-weight: 600;
         }
 
         .admin-sidebar .nav-link i {
             width: 20px;
             text-align: center;
+            font-size: 1.02rem;
         }
 
-        /* Main Content */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 64px 0 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(1px);
+            z-index: 45;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .admin-content {
-            margin-left: 260px;
-            padding: 24px;
-            min-height: calc(100vh - 60px);
+            margin-left: var(--sidebar-width);
+            min-height: calc(100vh - 64px);
+            padding: 22px;
         }
 
         .admin-content .page-header {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .admin-content .page-header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 8px;
+            font-size: 1.65rem;
+            font-weight: 800;
+            margin-bottom: 6px;
         }
 
         .admin-content .page-header p {
-            color: var(--text-light);
+            color: var(--text-muted);
             margin: 0;
         }
 
-        /* Cards */
         .admin-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 24px;
-            margin-bottom: 24px;
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: var(--shadow-sm);
+            padding: 18px;
+            margin-bottom: 18px;
         }
 
         .admin-card .card-header {
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 16px;
-            margin-bottom: 16px;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            background: transparent;
         }
 
         .admin-card .card-header h5 {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.03rem;
+            font-weight: 700;
             margin: 0;
         }
 
-        /* Stats Cards */
         .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: transform .16s ease, box-shadow .16s ease;
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            box-shadow: var(--shadow-md);
         }
 
         .stat-card .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            margin-bottom: 12px;
+            font-size: 18px;
+            margin-bottom: 8px;
         }
 
         .stat-card .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 4px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 2px;
         }
 
         .stat-card .stat-label {
-            color: var(--text-light);
-            font-size: 13px;
+            color: var(--text-muted);
+            font-size: 12px;
             margin: 0;
         }
 
         .stat-card.stat-card-compact {
-            padding: 12px 16px;
-            border-radius: 10px;
-        }
-
-        .stat-card.stat-card-compact:hover {
-            transform: translateY(-1px);
-        }
-
-        .stat-card.stat-card-compact .stat-icon {
-            width: 36px;
-            height: 36px;
-            font-size: 18px;
-            margin-bottom: 8px;
-            border-radius: 10px;
-        }
-
-        .stat-card.stat-card-compact .stat-value {
-            font-size: 1.35rem;
-            margin-bottom: 2px;
-        }
-
-        .stat-card.stat-card-compact .stat-label {
-            font-size: 12px;
+            border-radius: 12px;
         }
 
         .badge-sidebar {
-            background: var(--sidebar-bg);
+            background: var(--primary-500);
             color: #fff;
-            font-weight: 500;
-            font-size: 0.75rem;
+            font-weight: 600;
+            font-size: 0.72rem;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--text-main);
+            --bs-table-hover-color: var(--text-main);
+            --bs-table-hover-bg: color-mix(in srgb, var(--primary-500) 6%, transparent);
+            --bs-table-border-color: var(--border-color);
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            color: var(--text-muted);
+            font-weight: 700;
+            border-bottom-width: 1px;
+        }
+
+        .table-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            justify-content: flex-end;
+        }
+
+        .action-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-card);
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all .16s ease;
+        }
+
+        .action-icon:hover {
+            transform: translateY(-1px);
+        }
+
+        .action-icon i {
+            font-size: .95rem;
+            line-height: 1;
+        }
+
+        .action-icon--view:hover {
+            color: #2563eb;
+            border-color: #93c5fd;
+            background: #eff6ff;
+        }
+
+        .action-icon--edit:hover {
+            color: #4f46e5;
+            border-color: #c4b5fd;
+            background: #eef2ff;
+        }
+
+        .action-icon--success:hover {
+            color: #059669;
+            border-color: #a7f3d0;
+            background: #ecfdf5;
+        }
+
+        .action-icon--warn:hover {
+            color: #b45309;
+            border-color: #fcd34d;
+            background: #fffbeb;
+        }
+
+        .action-icon--delete:hover {
+            color: #dc2626;
+            border-color: #fca5a5;
+            background: #fef2f2;
+        }
+
+        .form-control,
+        .form-select {
+            border-color: var(--border-color);
+            background: var(--surface-card);
+            color: var(--text-main);
+            border-radius: 10px;
+            min-height: 40px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: color-mix(in srgb, var(--primary-500) 70%, white);
+            box-shadow: 0 0 0 .2rem rgba(79, 70, 229, .16);
+            background: var(--surface-card);
+            color: var(--text-main);
+        }
+
+        .offcanvas,
+        .offcanvas-header,
+        .offcanvas-body {
+            background: var(--surface-card) !important;
+            color: var(--text-main);
+        }
+
+        .modal-content {
+            background: var(--surface-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .role-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .2px;
+        }
+
+        .role-badge.admin { background: #4f46e5; color: white; }
+        .role-badge.editor { background: #0ea5e9; color: white; }
+        .role-badge.author { background: #14b8a6; color: white; }
+
+        .btn-primary {
+            background: var(--primary-500);
+            border-color: var(--primary-500);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background: var(--primary-600);
+            border-color: var(--primary-600);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--primary-500);
+            color: var(--primary-500);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-500);
+            border-color: var(--primary-500);
+            color: #fff;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        @media (max-width: 992px) {
             .admin-sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s;
+                transform: translateX(-102%);
+                box-shadow: var(--shadow-md);
             }
 
             .admin-sidebar.show {
@@ -266,106 +472,65 @@
 
             .admin-content {
                 margin-left: 0;
+                padding: 16px;
             }
-        }
-
-        /* Badges */
-        .role-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .role-badge.admin {
-            background: #1A25FF;
-            color: white;
-        }
-
-        .role-badge.editor {
-            background: #4A54FF;
-            color: white;
-        }
-
-        .role-badge.author {
-            background: #6B73FF;
-            color: white;
-        }
-
-        .btn-primary {
-            background: #1A25FF;
-            border-color: #1A25FF;
-        }
-
-        .btn-primary:hover {
-            background: #1419CC;
-            border-color: #1419CC;
-        }
-
-        .btn-outline-primary {
-            border-color: #1A25FF;
-            color: #1A25FF;
-        }
-
-        .btn-outline-primary:hover {
-            background: #1A25FF;
-            border-color: #1A25FF;
-            color: white;
         }
     </style>
     @stack('styles')
 </head>
 <body>
+    <div class="admin-shell">
     <!-- Top Bar -->
+    @php
+        $adminLogo = \App\Models\Setting::get('site_logo');
+        $adminSiteName = \App\Models\Setting::get('site_name') ?: 'Jornal a Borda';
+    @endphp
     <div class="admin-topbar">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2 gap-md-3">
+            <button class="topbar-action d-lg-none" id="openSidebar" type="button" aria-label="Abrir menu">
+                <i class="bi bi-list fs-5"></i>
+            </button>
             <a href="{{ route('admin.dashboard') }}" class="logo">
-                <i class="bi bi-speedometer2 me-2"></i>Painel Admin
-            </a>
-            <a href="{{ route('home') }}" class="text-muted text-decoration-none" target="_blank">
-                <i class="bi bi-box-arrow-up-right me-1"></i>Ver Site
+                @if($adminLogo)
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url($adminLogo) }}" alt="{{ $adminSiteName }}">
+                @endif
+                <span>{{ $adminSiteName }}</span>
             </a>
         </div>
         <div class="user-info">
-            <div class="text-end">
-                <div class="fw-semibold">{{ auth()->user()->name }}</div>
-                <small class="text-muted">{{ auth()->user()->position ?? ucfirst(auth()->user()->role) }}</small>
+            <a href="{{ route('home') }}" class="text-muted text-decoration-none d-none d-md-inline-flex align-items-center" target="_blank">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Ver Site
+            </a>
+            <button id="userMenuBtn" class="user-menu-btn" type="button" aria-expanded="false" aria-haspopup="true">
+                <div class="text-end">
+                    <div class="fw-semibold">{{ auth()->user()->name }}</div>
+                </div>
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=80&background=1A25FF&color=fff" 
+                     class="user-avatar" alt="{{ auth()->user()->name }}">
+            </button>
+            <div id="userMenu" class="user-menu d-none">
+                <a href="{{ route('admin.profile') }}" class="user-menu-item border-bottom">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Perfil</span>
+                </a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="user-menu-item text-danger">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Sair</span>
+                    </button>
+                </form>
             </div>
-            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=80&background=1A25FF&color=fff" 
-                 class="user-avatar" alt="{{ auth()->user()->name }}">
-            <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-box-arrow-right me-1"></i>Sair
-                </button>
-            </form>
         </div>
     </div>
 
     <!-- Sidebar -->
-    <div class="admin-sidebar">
-        <div class="user-card text-center">
-            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=120&background=1A25FF&color=fff" 
-                 alt="{{ auth()->user()->name }}">
-            <h6>{{ auth()->user()->name }}</h6>
-            <small>{{ auth()->user()->position ?? ucfirst(auth()->user()->role) }}</small>
-            <div class="mt-2">
-                <span class="role-badge {{ auth()->user()->role }}">
-                    {{ ucfirst(auth()->user()->role) }}
-                </span>
-            </div>
-        </div>
-
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="admin-sidebar" id="adminSidebar">
         <nav class="nav flex-column">
             <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                 <i class="bi bi-speedometer2"></i>
                 <span>Dashboard</span>
-            </a>
-            <a class="nav-link {{ request()->routeIs('admin.profile*') ? 'active' : '' }}" href="{{ route('admin.profile') }}">
-                <i class="bi bi-person"></i>
-                <span>Perfil</span>
             </a>
             <a class="nav-link {{ request()->routeIs('admin.posts*') ? 'active' : '' }}" href="{{ route('admin.posts.index') }}">
                 <i class="bi bi-file-text"></i>
@@ -402,14 +567,74 @@
             </a>
             @endif
         </nav>
-    </div>
+    </aside>
 
     <!-- Main Content -->
     <main class="admin-content">
         @yield('content')
     </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('adminSidebar');
+            const openSidebar = document.getElementById('openSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenu = document.getElementById('userMenu');
+
+            function closeSidebar() {
+                if (!sidebar || !overlay) return;
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+
+            if (openSidebar && sidebar && overlay) {
+                openSidebar.addEventListener('click', function() {
+                    sidebar.classList.add('show');
+                    overlay.classList.add('show');
+                });
+                overlay.addEventListener('click', closeSidebar);
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth >= 992) {
+                        closeSidebar();
+                    }
+                });
+            }
+
+            function closeUserMenu() {
+                if (!userMenu || !userMenuBtn) return;
+                userMenu.classList.add('d-none');
+                userMenuBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            if (userMenuBtn && userMenu) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isHidden = userMenu.classList.contains('d-none');
+                    if (isHidden) {
+                        userMenu.classList.remove('d-none');
+                        userMenuBtn.setAttribute('aria-expanded', 'true');
+                    } else {
+                        closeUserMenu();
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userMenu.contains(e.target) && !userMenuBtn.contains(e.target)) {
+                        closeUserMenu();
+                    }
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closeUserMenu();
+                    }
+                });
+            }
+        });
+    </script>
     
     <!-- Global Loading Script for Submit Buttons -->
     <script>

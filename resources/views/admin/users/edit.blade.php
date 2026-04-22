@@ -25,7 +25,7 @@
                     <i class="bi bi-person me-2"></i>Informações do Usuário
                 </h5>
             </div>
-            <form method="POST" action="{{ route('admin.users.update', $user) }}" id="userForm">
+            <form method="POST" action="{{ route('admin.users.update', $user) }}" id="userForm" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -95,6 +95,16 @@
                            id="avatar" name="avatar" value="{{ old('avatar', $user->avatar) }}" 
                            placeholder="https://exemplo.com/avatar.jpg">
                     @error('avatar')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label for="avatar_file" class="form-label fw-semibold">Upload da Foto de Perfil</label>
+                    <input type="file" class="form-control @error('avatar_file') is-invalid @enderror"
+                           id="avatar_file" name="avatar_file" accept="image/*">
+                    <small class="text-muted">Formatos: JPEG, PNG, GIF, WebP. Maximo: 2MB.</small>
+                    @error('avatar_file')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -171,7 +181,19 @@
                 <div class="mb-3 pb-3 border-bottom">
                     <p class="mb-1 text-muted small">Role Atual</p>
                     <p class="mb-0">
-                        <span class="role-badge {{ $user->role }}">{{ ucfirst($user->role) }}</span>
+                        @php
+                            $editRoleLabel = match ($user->role) {
+                                'admin' => 'Administrador',
+                                'editor' => 'Editor',
+                                'author' => 'Autor',
+                                'reviewer' => 'Revisor',
+                                'social_media' => 'Social Media',
+                                'communication' => 'Comunicacao',
+                                'designer' => 'Designer',
+                                default => ucfirst((string) $user->role),
+                            };
+                        @endphp
+                        <span class="role-badge {{ $user->role }}">{{ $editRoleLabel }}</span>
                     </p>
                 </div>
                 <div class="mb-3 pb-3 border-bottom">
@@ -199,6 +221,17 @@
         } else if (!url) {
             preview.src = 'https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=200&background=1A25FF&color=fff';
         }
+    });
+
+    document.getElementById('avatar_file').addEventListener('change', function() {
+        const file = this.files && this.files[0];
+        const preview = document.getElementById('avatarPreview');
+        if (!file || !preview) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     });
 </script>
 @endpush

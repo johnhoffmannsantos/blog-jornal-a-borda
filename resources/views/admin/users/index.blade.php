@@ -86,7 +86,19 @@
                         <small>{{ $user->email }}</small>
                     </td>
                     <td>
-                        <span class="role-badge {{ $user->role }}">{{ ucfirst($user->role) }}</span>
+                        @php
+                            $roleLabel = match ($user->role) {
+                                'admin' => 'Administrador',
+                                'editor' => 'Editor',
+                                'author' => 'Autor',
+                                'reviewer' => 'Revisor',
+                                'social_media' => 'Social Media',
+                                'communication' => 'Comunicacao',
+                                'designer' => 'Designer',
+                                default => ucfirst((string) $user->role),
+                            };
+                        @endphp
+                        <span class="role-badge {{ $user->role }}">{{ $roleLabel }}</span>
                     </td>
                     <td>
                         <small class="text-muted">{{ $user->position ?? '-' }}</small>
@@ -113,9 +125,9 @@
                         <span class="badge bg-info">Você</span>
                         @endif
                     </td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{{ route('admin.users.edit', $user) }}" class="action-icon action-icon--edit" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             @if($user->id !== Auth::id())
@@ -123,7 +135,7 @@
                                   onsubmit="return confirm('Tem certeza que deseja excluir o usuário {{ $user->name }}?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <button type="submit" class="action-icon action-icon--delete" title="Excluir">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>

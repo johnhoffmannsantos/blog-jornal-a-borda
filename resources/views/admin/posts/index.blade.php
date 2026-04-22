@@ -218,16 +218,16 @@
                             <i class="bi bi-eye me-1"></i>{{ $post->views ?? 0 }}
                         </span>
                     </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <a href="{{ route('admin.posts.edit', $post) }}" class="btn btn-outline-primary" title="Editar">
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{{ route('admin.posts.edit', $post) }}" class="action-icon action-icon--edit" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <form method="POST" action="{{ route('admin.posts.destroy', $post) }}" class="d-inline" 
                                   onsubmit="return confirm('Tem certeza que deseja excluir este post?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger" title="Excluir">
+                                <button type="submit" class="action-icon action-icon--delete" title="Excluir">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>

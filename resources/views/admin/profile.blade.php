@@ -205,7 +205,19 @@
                 <div class="mb-3 pb-3 border-bottom">
                     <p class="mb-1 text-muted small">Role</p>
                     <p class="mb-0">
-                        <span class="role-badge {{ $user->role }}">{{ ucfirst($user->role) }}</span>
+                        @php
+                            $profileRoleLabel = match ($user->role) {
+                                'admin' => 'Administrador',
+                                'editor' => 'Editor',
+                                'author' => 'Autor',
+                                'reviewer' => 'Revisor',
+                                'social_media' => 'Social Media',
+                                'communication' => 'Comunicacao',
+                                'designer' => 'Designer',
+                                default => ucfirst((string) $user->role),
+                            };
+                        @endphp
+                        <span class="role-badge {{ $user->role }}">{{ $profileRoleLabel }}</span>
                     </p>
                 </div>
                 <div class="mb-3 pb-3 border-bottom">

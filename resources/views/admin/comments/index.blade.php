@@ -74,14 +74,14 @@
                     <td>
                         <small>{{ $comment->created_at->format('d/m/Y H:i') }}</small>
                     </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
+                    <td class="text-end">
+                        <div class="table-actions">
                             @if($comment->status !== 'approved')
                             <form method="POST" action="{{ route('admin.comments.updateStatus', $comment) }}" class="d-inline">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="status" value="approved">
-                                <button type="submit" class="btn btn-outline-success" title="Aprovar">
+                                <button type="submit" class="action-icon action-icon--success" title="Aprovar">
                                     <i class="bi bi-check-circle"></i>
                                 </button>
                             </form>
@@ -91,7 +91,7 @@
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="status" value="spam">
-                                <button type="submit" class="btn btn-outline-danger" title="Marcar como Spam">
+                                <button type="submit" class="action-icon action-icon--warn" title="Marcar como Spam">
                                     <i class="bi bi-shield-exclamation"></i>
                                 </button>
                             </form>
@@ -100,7 +100,7 @@
                                   onsubmit="return confirm('Tem certeza que deseja excluir este comentário?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger" title="Excluir">
+                                <button type="submit" class="action-icon action-icon--delete" title="Excluir">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>

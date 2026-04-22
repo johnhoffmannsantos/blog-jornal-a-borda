@@ -20,7 +20,7 @@
     <div class="card-body">
         @if($partners->count() > 0)
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Logo</th>
@@ -61,15 +61,15 @@
                             <span class="badge bg-secondary">Inativo</span>
                             @endif
                         </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a href="{{ route('admin.partners.edit', $partner) }}" class="btn btn-sm btn-outline-primary">
+                        <td class="text-end">
+                            <div class="table-actions">
+                                <a href="{{ route('admin.partners.edit', $partner) }}" class="action-icon action-icon--edit" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <form action="{{ route('admin.partners.destroy', $partner) }}" method="POST" class="d-inline delete-form">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <button type="submit" class="action-icon action-icon--delete" title="Excluir">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

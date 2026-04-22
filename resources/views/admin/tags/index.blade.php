@@ -72,9 +72,9 @@
                     <td>
                         <span class="badge badge-sidebar">{{ $tag->posts_count }} post(s)</span>
                     </td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('admin.tags.edit', $tag) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{{ route('admin.tags.edit', $tag) }}" class="action-icon action-icon--edit" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             @if($tag->posts_count > 0)
@@ -82,7 +82,7 @@
                                   onsubmit="return confirm('Tem certeza? Esta tag está atrelada a {{ $tag->posts_count }} post(s). O atrelamento será removido.');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir (removerá atrelamento)">
+                                <button type="submit" class="action-icon action-icon--delete" title="Excluir (removerá atrelamento)">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -91,7 +91,7 @@
                                   onsubmit="return confirm('Tem certeza que deseja excluir esta tag?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <button type="submit" class="action-icon action-icon--delete" title="Excluir">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>

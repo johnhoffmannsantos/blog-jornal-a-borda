@@ -19,7 +19,7 @@
     <div class="card-body">
         @if($editions->count() > 0)
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th>Capa</th>
@@ -70,21 +70,21 @@
                             <span class="badge bg-secondary">Normal</span>
                             @endif
                         </td>
-                        <td>
-                            <div class="btn-group" role="group">
+                        <td class="text-end">
+                            <div class="table-actions">
                                 <a href="{{ route('journal-editions.show', $edition->slug) }}" 
-                                   class="btn btn-sm btn-outline-info" target="_blank" title="Ver no site">
+                                   class="action-icon action-icon--view" target="_blank" title="Ver no site">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <a href="{{ route('admin.journal-editions.edit', $edition) }}" 
-                                   class="btn btn-sm btn-outline-primary">
+                                   class="action-icon action-icon--edit" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <form action="{{ route('admin.journal-editions.destroy', $edition) }}" 
                                       method="POST" class="d-inline delete-form">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <button type="submit" class="action-icon action-icon--delete" title="Excluir">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

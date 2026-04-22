@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -108,6 +109,7 @@ class UserController extends Controller
             'position' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:500'],
             'avatar' => ['nullable', 'url', 'max:500'],
+            'avatar_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password' => ['nullable', 'min:8', 'confirmed'],
         ]);
 
@@ -117,6 +119,18 @@ class UserController extends Controller
         $user->position = $validated['position'] ?? null;
         $user->bio = $validated['bio'] ?? null;
         $user->avatar = $validated['avatar'] ?? null;
+
+        if ($request->hasFile('avatar_file')) {
+            if ($user->avatar && str_contains($user->avatar, '/storage/users/avatars/')) {
+                $oldPath = str_replace(Storage::disk('public')->url(''), '', $user->avatar);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            $path = $request->file('avatar_file')->store('users/avatars', 'public');
+            $user->avatar = Storage::disk('public')->url($path);
+        }
 
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
