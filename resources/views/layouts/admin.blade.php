@@ -494,7 +494,6 @@
                 @if($adminLogo)
                     <img src="{{ \Illuminate\Support\Facades\Storage::url($adminLogo) }}" alt="{{ $adminSiteName }}">
                 @endif
-                <span>{{ $adminSiteName }}</span>
             </a>
         </div>
         <div class="user-info">
