@@ -11,6 +11,8 @@
 /.phpunit.cache
 /.vscode
 /.zed
+# Banco SQLite local (Docker / dev)
+/laravel_db
 /auth.json
 /node_modules
 /public/build
