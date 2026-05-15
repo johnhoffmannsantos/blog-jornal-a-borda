@@ -78,11 +78,13 @@
                     </div>
                     <div class="flex-shrink-0">
                         @php
-                            $dashStatus = match ($post->status) {
-                                'published' => ['success', 'Publicado'],
-                                'scheduled' => ['info', 'Agendado'],
-                                default => ['warning', 'Rascunho'],
-                            };
+                            if ($post->status === 'draft') {
+                                $dashStatus = ['warning', 'Rascunho'];
+                            } elseif ($post->is_awaiting_publication_date) {
+                                $dashStatus = ['info', 'Aguardando data'];
+                            } else {
+                                $dashStatus = ['success', 'No ar'];
+                            }
                         @endphp
                         <span class="badge bg-{{ $dashStatus[0] }}">{{ $dashStatus[1] }}</span>
                     </div>

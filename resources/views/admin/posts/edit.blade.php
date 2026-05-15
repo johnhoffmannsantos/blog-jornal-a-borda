@@ -35,11 +35,13 @@
                     </h5>
                     <div>
                         @php
-                            $statusBadge = match ($post->status) {
-                                'published' => ['success', 'Publicado'],
-                                'scheduled' => ['info', 'Agendado'],
-                                default => ['warning', 'Rascunho'],
-                            };
+                            if ($post->status === 'draft') {
+                                $statusBadge = ['warning', 'Rascunho'];
+                            } elseif ($post->is_awaiting_publication_date) {
+                                $statusBadge = ['info', 'Publicado · aguardando data'];
+                            } else {
+                                $statusBadge = ['success', 'No ar'];
+                            }
                         @endphp
                         <span class="badge bg-{{ $statusBadge[0] }}">{{ $statusBadge[1] }}</span>
                     </div>
@@ -162,8 +164,7 @@
                     <select class="form-select @error('status') is-invalid @enderror" 
                             id="status" name="status" required>
                         <option value="draft" {{ old('status', $post->status) === 'draft' ? 'selected' : '' }}>Rascunho</option>
-                        <option value="scheduled" {{ old('status', $post->status) === 'scheduled' ? 'selected' : '' }}>Agendado</option>
-                        <option value="published" {{ old('status', $post->status) === 'published' ? 'selected' : '' }}>Publicado</option>
+                        <option value="published" {{ in_array(old('status', $post->status), ['published', 'scheduled'], true) ? 'selected' : '' }}>Publicado</option>
                     </select>
                     @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -193,7 +194,7 @@
                             @enderror
                         </div>
                     </div>
-                    <small class="text-muted d-block mt-2">Hora só em <strong>24 horas</strong> (ex.: 14:30). Em <strong>Agendado</strong>, data e hora no futuro.</small>
+                    <small class="text-muted d-block mt-2">Obrigatório em <strong>Publicado</strong>. Data/hora futura: entra no ar automaticamente na hora marcada.</small>
                 </div>
 
                 <div class="d-grid gap-2">
@@ -470,7 +471,7 @@
         if (!statusEl || !publishedAtDate || !publishedAtTimeInput) return;
         publishedAtDate.removeAttribute('required');
         publishedAtTimeInput.removeAttribute('required');
-        if (statusEl.value === 'scheduled') {
+        if (statusEl.value === 'published') {
             publishedAtDate.setAttribute('required', 'required');
             publishedAtTimeInput.setAttribute('required', 'required');
         }

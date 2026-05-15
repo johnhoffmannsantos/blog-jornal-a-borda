@@ -9,7 +9,6 @@ use App\Models\Tag;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -78,14 +77,14 @@ class PostController extends Controller
             'content' => ['required', 'string'],
             'category_id' => ['required', 'exists:categories,id'],
             'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
-            'status' => ['required', 'in:draft,scheduled,published'],
+            'status' => ['required', 'in:draft,published'],
             'published_at_date' => ['nullable', 'date'],
             'published_at_time' => ['nullable', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'tags' => ['nullable', 'array'],
             'author_id' => ['nullable', 'exists:users,id'],
         ];
 
-        if ($status === 'scheduled') {
+        if ($status === 'published') {
             $rules['published_at_date'] = ['required', 'date'];
             $rules['published_at_time'] = ['required', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'];
         }
@@ -100,20 +99,6 @@ class PostController extends Controller
 
         if ($validated['status'] === 'draft') {
             $publishedAt = null;
-        }
-
-        if ($validated['status'] === 'scheduled') {
-            if (! $publishedAt || ! $publishedAt->isFuture()) {
-                throw ValidationException::withMessages([
-                    'published_at_date' => 'Informe data e hora no futuro para agendar a publicação.',
-                ]);
-            }
-        }
-
-        if ($validated['status'] === 'published' && $publishedAt && $publishedAt->isFuture()) {
-            throw ValidationException::withMessages([
-                'published_at_date' => 'Para publicar no futuro, use o status Agendado.',
-            ]);
         }
 
         $featuredImage = null;
@@ -194,14 +179,14 @@ class PostController extends Controller
             'content' => ['required', 'string'],
             'category_id' => ['required', 'exists:categories,id'],
             'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
-            'status' => ['required', 'in:draft,scheduled,published'],
+            'status' => ['required', 'in:draft,published'],
             'published_at_date' => ['nullable', 'date'],
             'published_at_time' => ['nullable', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],
             'tags' => ['nullable', 'array'],
             'author_id' => ['nullable', 'exists:users,id'],
         ];
 
-        if ($status === 'scheduled') {
+        if ($status === 'published') {
             $rules['published_at_date'] = ['required', 'date'];
             $rules['published_at_time'] = ['required', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'];
         }
@@ -216,20 +201,6 @@ class PostController extends Controller
 
         if ($validated['status'] === 'draft') {
             $publishedAt = null;
-        }
-
-        if ($validated['status'] === 'scheduled') {
-            if (! $publishedAt || ! $publishedAt->isFuture()) {
-                throw ValidationException::withMessages([
-                    'published_at_date' => 'Informe data e hora no futuro para agendar a publicação.',
-                ]);
-            }
-        }
-
-        if ($validated['status'] === 'published' && $publishedAt && $publishedAt->isFuture()) {
-            throw ValidationException::withMessages([
-                'published_at_date' => 'Para publicar no futuro, use o status Agendado.',
-            ]);
         }
 
         $featuredImage = $post->featured_image;

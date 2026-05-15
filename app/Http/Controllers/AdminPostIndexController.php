@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Listagem de posts do painel (filtros, ordenação por data de publicação).
- * Mantido fora de Admin\PostController quando esse arquivo não é gravável no deploy.
  */
 class AdminPostIndexController extends Controller
 {
@@ -19,12 +18,12 @@ class AdminPostIndexController extends Controller
     {
         $user = Auth::user();
 
-        // Normaliza GET: strings vazias viram null (validação date + filtros consistentes)
         $searchTrim = trim((string) $request->input('search', ''));
 
         $request->merge([
             'search' => $searchTrim !== '' ? $searchTrim : null,
             'status' => $request->filled('status') ? $request->status : null,
+            'visibility' => $request->filled('visibility') ? $request->visibility : null,
             'category' => $request->filled('category') ? $request->category : null,
             'author' => $user->canManageAllPosts() && $request->filled('author') ? $request->author : null,
             'published_from' => $request->filled('published_from') ? $request->published_from : null,
@@ -33,7 +32,8 @@ class AdminPostIndexController extends Controller
 
         $rules = [
             'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', 'in:published,draft,scheduled'],
+            'status' => ['nullable', 'in:published,draft'],
+            'visibility' => ['nullable', 'in:live,upcoming'],
             'category' => ['nullable', 'integer', 'exists:categories,id'],
             'published_from' => ['nullable', 'date'],
             'published_to' => ['nullable', 'date'],
@@ -53,8 +53,8 @@ class AdminPostIndexController extends Controller
 
         $stats = [
             'total' => (clone $statsQuery)->count(),
-            'published' => (clone $statsQuery)->where('status', 'published')->count(),
-            'scheduled' => (clone $statsQuery)->where('status', 'scheduled')->count(),
+            'live' => (clone $statsQuery)->visibleOnSite()->count(),
+            'upcoming' => (clone $statsQuery)->publishedAwaitingDate()->count(),
             'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
         ];
 
@@ -64,6 +64,14 @@ class AdminPostIndexController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('visibility')) {
+            if ($request->visibility === 'live') {
+                $query->visibleOnSite();
+            } elseif ($request->visibility === 'upcoming') {
+                $query->publishedAwaitingDate();
+            }
         }
 
         if ($request->filled('category')) {

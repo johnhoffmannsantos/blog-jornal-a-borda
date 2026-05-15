@@ -1,6 +1,5 @@
 <?php
 
-use App\Support\PostStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -12,9 +11,8 @@ class AddScheduledStatusToPostsTable extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'mysql') {
-            PostStatusEnum::ensureMysqlIncludesScheduled();
+            DB::statement("ALTER TABLE `posts` MODIFY COLUMN `status` ENUM('draft', 'scheduled', 'published') NOT NULL DEFAULT 'published'");
         }
-        // SQLite: coluna enum do Laravel já é string; novos valores são aceitos sem ALTER.
     }
 
     public function down(): void

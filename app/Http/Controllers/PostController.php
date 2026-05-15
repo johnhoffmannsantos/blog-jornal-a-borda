@@ -13,21 +13,15 @@ class PostController extends Controller
     {
         $post = Post::with(['author', 'category', 'tags', 'comments.replies'])
             ->where('slug', $slug)
-            ->where('status', 'published')
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+            ->visibleOnSite()
             ->firstOrFail();
 
-        $previousPost = Post::where('status', 'published')
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+        $previousPost = Post::visibleOnSite()
             ->where('published_at', '<', $post->published_at)
             ->orderBy('published_at', 'desc')
             ->first();
 
-        $nextPost = Post::where('status', 'published')
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+        $nextPost = Post::visibleOnSite()
             ->where('published_at', '>', $post->published_at)
             ->orderBy('published_at', 'asc')
             ->first();
@@ -43,9 +37,7 @@ class PostController extends Controller
     public function storeComment(Request $request, $slug)
     {
         $post = Post::where('slug', $slug)
-            ->where('status', 'published')
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+            ->visibleOnSite()
             ->firstOrFail();
 
         $validated = $request->validate([

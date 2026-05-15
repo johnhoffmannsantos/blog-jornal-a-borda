@@ -18,8 +18,6 @@
 <div class="admin-card">
     {{-- Formulários separados: HTML não permite <form> dentro de <form>; botões/inputs usam atributo form="" --}}
     <form id="testEmailForm" method="POST" action="{{ route('admin.settings.testEmail') }}" class="d-none" tabindex="-1" aria-hidden="true">@csrf</form>
-    <form id="cronPublishForm" method="POST" action="{{ route('admin.settings.cron.publish') }}" class="d-none" tabindex="-1" aria-hidden="true">@csrf</form>
-    <form id="cronScheduleListForm" method="POST" action="{{ route('admin.settings.cron.scheduleList') }}" class="d-none" tabindex="-1" aria-hidden="true">@csrf</form>
 
     <!-- Tabs Navigation -->
     <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
@@ -39,12 +37,6 @@
             <button class="nav-link {{ $activeTab === 'smtp' ? 'active' : '' }}" id="smtp-tab" data-bs-toggle="tab" data-bs-target="#smtp" 
                     type="button" role="tab" aria-controls="smtp" aria-selected="{{ $activeTab === 'smtp' ? 'true' : 'false' }}">
                 <i class="bi bi-envelope me-2"></i>Configurações SMTP
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link {{ $activeTab === 'cron' ? 'active' : '' }}" id="cron-tab" data-bs-toggle="tab" data-bs-target="#cron" 
-                    type="button" role="tab" aria-controls="cron" aria-selected="{{ $activeTab === 'cron' ? 'true' : 'false' }}">
-                <i class="bi bi-clock-history me-2"></i>Cron / agendador
             </button>
         </li>
     </ul>
@@ -333,47 +325,6 @@
                 </div>
             </div>
 
-            <!-- Tab 4: Cron / agendador Laravel -->
-            <div class="tab-pane fade {{ $activeTab === 'cron' ? 'show active' : '' }}" id="cron" role="tabpanel" aria-labelledby="cron-tab">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>
-                    O servidor precisa executar <code>php artisan schedule:run</code> a cada minuto (ex.: crontab).
-                    Se a “última publicação agendada” não atualizar sozinha, o cron do sistema não está chamando o Laravel.
-                </div>
-
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <h6 class="fw-semibold mb-2">Última execução do job de posts agendados</h6>
-                        <p class="mb-0 text-muted small">
-                            @if(!empty($cronLastPublish))
-                                <span class="text-dark fw-medium">{{ \Carbon\Carbon::parse($cronLastPublish)->timezone(config('app.timezone'))->format('d/m/Y H:i:s') }}</span>
-                            @else
-                                Ainda não registrado (rode o comando manualmente ou aguarde o cron).
-                            @endif
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="fw-semibold mb-2">Posts com status “agendado” pendentes</h6>
-                        <p class="mb-0"><span class="badge bg-secondary fs-6">{{ $scheduledPendingCount ?? 0 }}</span></p>
-                    </div>
-                </div>
-
-                <div class="d-flex flex-wrap gap-2 mb-4">
-                    <button type="submit" form="cronPublishForm" class="btn btn-primary">
-                        <i class="bi bi-play-circle me-1"></i>Publicar agendados agora
-                    </button>
-                    <button type="submit" form="cronScheduleListForm" class="btn btn-outline-primary">
-                        <i class="bi bi-list-task me-1"></i>Ver <code>schedule:list</code>
-                    </button>
-                </div>
-
-                @if(session('cron_schedule_output'))
-                <div class="mb-0">
-                    <label class="form-label fw-semibold">Saída de <code>schedule:list</code></label>
-                    <pre class="bg-light border rounded p-3 small mb-0" style="max-height: 320px; overflow: auto;">{{ session('cron_schedule_output') }}</pre>
-                </div>
-                @endif
-            </div>
 
     </div>
 

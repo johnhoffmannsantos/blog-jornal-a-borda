@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $activeFilterKeys = collect(['search', 'status', 'category', 'author', 'published_from', 'published_to'])
+    $activeFilterKeys = collect(['search', 'status', 'visibility', 'category', 'author', 'published_from', 'published_to'])
         ->filter(fn ($k) => filled(request($k)));
     $activeFilterCount = $activeFilterKeys->count();
 @endphp
@@ -55,9 +55,17 @@
                 <select class="form-select" name="status">
                     <option value="">Todos</option>
                     <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publicado</option>
-                    <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>Agendado</option>
                     <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Rascunho</option>
                 </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-medium">Visibilidade no site</label>
+                <select class="form-select" name="visibility">
+                    <option value="">Todas</option>
+                    <option value="live" {{ request('visibility') === 'live' ? 'selected' : '' }}>No ar</option>
+                    <option value="upcoming" {{ request('visibility') === 'upcoming' ? 'selected' : '' }}>Aguardando data</option>
+                </select>
+                <small class="text-muted d-block mt-1">Publicados com data futura entram no ar na hora marcada, sem cron.</small>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-medium">Categoria</label>
@@ -121,8 +129,8 @@
             <div class="stat-icon bg-success bg-opacity-10 text-success">
                 <i class="bi bi-check-circle"></i>
             </div>
-            <div class="stat-value">{{ $stats['published'] }}</div>
-            <p class="stat-label">Publicados</p>
+            <div class="stat-value">{{ $stats['live'] }}</div>
+            <p class="stat-label">No ar</p>
         </div>
     </div>
     <div class="col-6 col-md-3">
@@ -130,8 +138,8 @@
             <div class="stat-icon bg-info bg-opacity-10 text-info">
                 <i class="bi bi-calendar-event"></i>
             </div>
-            <div class="stat-value">{{ $stats['scheduled'] ?? 0 }}</div>
-            <p class="stat-label">Agendados</p>
+            <div class="stat-value">{{ $stats['upcoming'] ?? 0 }}</div>
+            <p class="stat-label">Aguardando data</p>
         </div>
     </div>
     <div class="col-6 col-md-3">
@@ -196,11 +204,13 @@
                     </td>
                     <td>
                         @php
-                            $rowStatus = match ($post->status) {
-                                'published' => ['success', 'Publicado'],
-                                'scheduled' => ['info', 'Agendado'],
-                                default => ['warning', 'Rascunho'],
-                            };
+                            if ($post->status === 'draft') {
+                                $rowStatus = ['warning', 'Rascunho'];
+                            } elseif ($post->is_awaiting_publication_date) {
+                                $rowStatus = ['info', 'Aguardando data'];
+                            } else {
+                                $rowStatus = ['success', 'No ar'];
+                            }
                         @endphp
                         <span class="badge bg-{{ $rowStatus[0] }}">{{ $rowStatus[1] }}</span>
                     </td>

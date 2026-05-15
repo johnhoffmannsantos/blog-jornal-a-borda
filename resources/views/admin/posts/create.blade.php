@@ -94,7 +94,6 @@
                     <select class="form-select @error('status') is-invalid @enderror" 
                             id="status" name="status" required>
                         <option value="draft" {{ $oldStatus === 'draft' ? 'selected' : '' }}>Rascunho</option>
-                        <option value="scheduled" {{ $oldStatus === 'scheduled' ? 'selected' : '' }}>Agendado</option>
                         <option value="published" {{ $oldStatus === 'published' ? 'selected' : '' }}>Publicado</option>
                     </select>
                     @error('status')
@@ -144,7 +143,7 @@
                             @enderror
                         </div>
                     </div>
-                    <small class="text-muted d-block mt-2">Dois campos: data no calendário e hora só em <strong>24 horas</strong> (digite como 14:30). Em <strong>Rascunho</strong> não usa; em <strong>Agendado</strong> precisa ser no futuro.</small>
+                    <small class="text-muted d-block mt-2">Obrigatório em <strong>Publicado</strong>. Com data/hora futura, a matéria entra no ar automaticamente na hora marcada (sem cron).</small>
                 </div>
 
                 <div class="d-grid gap-2">
@@ -412,7 +411,7 @@
         const status = statusEl.value;
         publishedAtDate.removeAttribute('required');
         publishedAtTimeInput.removeAttribute('required');
-        if (status === 'scheduled') {
+        if (status === 'published') {
             publishedAtDate.setAttribute('required', 'required');
             publishedAtTimeInput.setAttribute('required', 'required');
         }

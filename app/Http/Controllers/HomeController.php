@@ -11,9 +11,7 @@ class HomeController extends Controller
     public function index()
     {
         $posts = Post::with(['author', 'category', 'tags'])
-            ->where('status', 'published')
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+            ->visibleOnSite()
             ->orderBy('published_at', 'desc')
             ->paginate(10);
 

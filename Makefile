@@ -1,4 +1,4 @@
-.PHONY: help up down restart build logs ps shell install ensure-vendor migrate fix-post-enum fresh seed test clean
+.PHONY: help up down restart build logs ps shell install ensure-vendor migrate fresh seed test clean
 
 # Bash evita sh do Windows sem suporte adequado a escapes / UTF-8 no terminal
 SHELL := bash
@@ -51,8 +51,7 @@ up: ## Sobe os containers Docker e mostra informações de acesso
 	@echo "   make install  - composer install no container (necessario na primeira vez)"
 	@echo "   make logs     - Ver logs dos containers"
 	@echo "   make shell    - Acessar shell do container Laravel"
-	@echo "   make migrate       - Executar migrações"
-	@echo "   make fix-post-enum - Corrigir ENUM status (se post agendado quebrar no MySQL)"
+	@echo "   make migrate  - Executar migrações"
 	@echo "   make down     - Parar containers"
 	@echo "$(BLUE)============================================================$(NC)"
 
@@ -80,10 +79,6 @@ shell: ## Acessa o shell do container Laravel
 migrate: ensure-vendor ## Executa as migrações do banco de dados
 	@echo "$(BLUE)Executando migrações...$(NC)"
 	@docker compose exec app php artisan migrate --force
-
-fix-post-enum: ensure-vendor ## Ajusta ENUM status em posts (MySQL) para incluir "scheduled" sem rodar migrate inteiro
-	@echo "$(BLUE)Ajustando coluna posts.status (MySQL)...$(NC)"
-	@docker compose exec app php artisan posts:fix-status-enum
 
 fresh: ensure-vendor ## Recria o banco de dados (apaga tudo e recria)
 	@echo "$(YELLOW)Recriando banco de dados...$(NC)"
