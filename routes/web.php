@@ -47,41 +47,43 @@ if (app()->environment('local')) {
 // Admin Routes
 Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Profile
     Route::get('/perfil', [ProfileController::class, 'index'])->name('profile');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
-    
+
     // Posts (listagem com filtros em controller dedicado)
     Route::get('posts', AdminPostIndexController::class)->name('posts.index');
     Route::resource('posts', AdminPostController::class)->except(['index']);
-    
+    Route::get('posts/{post}/preview', [AdminPostController::class, 'preview'])
+    ->name('posts.preview');
+
     // Categories
     Route::resource('categories', AdminCategoryController::class);
     Route::delete('/categories/{category}/force', [AdminCategoryController::class, 'forceDestroy'])->name('categories.forceDestroy');
-    
+
     // Tags
     Route::resource('tags', TagController::class);
     Route::delete('/tags/{tag}/force', [TagController::class, 'forceDestroy'])->name('tags.forceDestroy');
-    
+
     // Users (Admin only)
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggleActive');
-    
+
     // Image Upload (TinyMCE)
     Route::post('/upload-image', [ImageUploadController::class, 'upload'])->name('upload.image');
-    
+
     // Partners (Admin only)
     Route::resource('partners', PartnerController::class);
-    
+
     // Journal Editions (Admin only)
     Route::resource('journal-editions', AdminJournalEditionController::class);
-    
+
     // Comments
     Route::get('/comentarios', [CommentController::class, 'index'])->name('comments.index');
     Route::put('/comentarios/{comment}/status', [CommentController::class, 'updateStatus'])->name('comments.updateStatus');
     Route::delete('/comentarios/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
-    
+
     // Settings (Admin only)
     Route::get('/configuracoes', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/configuracoes', [SettingsController::class, 'update'])->name('settings.update');
