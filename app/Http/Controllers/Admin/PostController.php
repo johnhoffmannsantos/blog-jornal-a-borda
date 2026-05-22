@@ -17,7 +17,7 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         $query = Post::with(['author', 'category', 'tags']);
 
         // Query base para estatísticas (sem filtros de busca/filtro)
@@ -57,6 +57,26 @@ class PostController extends Controller
         $categories = Category::all();
 
         return view('admin.posts.index', compact('posts', 'categories', 'stats'));
+    }
+
+        public function preview($id)
+    {
+        $post = Post::with(['author', 'category', 'tags', 'comments.replies'])
+            ->findOrFail($id);
+
+        $previousPost = null;
+        $nextPost = null;
+
+        $categories = Category::withCount('posts')
+            ->orderBy('name')
+            ->get();
+
+        return view('post', compact(
+            'post',
+            'previousPost',
+            'nextPost',
+            'categories'
+        ));
     }
 
     public function create()
@@ -136,7 +156,7 @@ class PostController extends Controller
     public function show(Post $post)
     {
         $user = Auth::user();
-        
+
         // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para ver este post.');
@@ -148,7 +168,7 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         $user = Auth::user();
-        
+
         // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para editar este post.');
@@ -165,7 +185,7 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         $user = Auth::user();
-        
+
         // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para editar este post.');
@@ -248,7 +268,7 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $user = Auth::user();
-        
+
         // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para excluir este post.');

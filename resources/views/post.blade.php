@@ -28,7 +28,7 @@
                         </li>
                         <li class="list-inline-item">
                             <i class="bi bi-calendar3"></i>
-                            {{ $post->published_at->format('d/m/Y') }}
+                            {{ $post->published_at ? $post->published_at->format('d/m/Y') : 'Rascunho' }}
                         </li>
                         <li class="list-inline-item">
                             <i class="bi bi-eye"></i>
@@ -123,7 +123,7 @@
                         <div class="comment-item mb-4 pb-4 border-bottom">
                             <div class="d-flex align-items-start">
                                 <div class="comment-avatar me-3">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($comment->author_name) }}&size=48&background=1A25FF&color=fff" 
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($comment->author_name) }}&size=48&background=1A25FF&color=fff"
                                          alt="{{ $comment->author_name }}" class="rounded-circle">
                                 </div>
                                 <div class="comment-content flex-grow-1">
@@ -155,7 +155,7 @@
                     <h4 class="mb-4 mt-5">
                         <i class="bi bi-pencil me-2"></i>Deixe um comentário
                     </h4>
-                    
+
                     @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
@@ -180,8 +180,8 @@
                         <div class="row mb-3">
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="form-label fw-semibold">Nome *</label>
-                                <input type="text" class="form-control @error('author_name') is-invalid @enderror" 
-                                       placeholder="Seu nome" name="author_name" 
+                                <input type="text" class="form-control @error('author_name') is-invalid @enderror"
+                                       placeholder="Seu nome" name="author_name"
                                        value="{{ old('author_name') }}" required>
                                 @error('author_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -189,8 +189,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Email *</label>
-                                <input type="email" class="form-control @error('author_email') is-invalid @enderror" 
-                                       placeholder="seu@email.com" name="author_email" 
+                                <input type="email" class="form-control @error('author_email') is-invalid @enderror"
+                                       placeholder="seu@email.com" name="author_email"
                                        value="{{ old('author_email') }}" required>
                                 @error('author_email')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -199,8 +199,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Website (opcional)</label>
-                            <input type="url" class="form-control @error('author_url') is-invalid @enderror" 
-                                   placeholder="https://seu-site.com" name="author_url" 
+                            <input type="url" class="form-control @error('author_url') is-invalid @enderror"
+                                   placeholder="https://seu-site.com" name="author_url"
                                    value="{{ old('author_url') }}">
                             @error('author_url')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -208,7 +208,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Comentário *</label>
-                            <textarea class="form-control @error('content') is-invalid @enderror" rows="6" 
+                            <textarea class="form-control @error('content') is-invalid @enderror" rows="6"
                                       placeholder="Escreva seu comentário aqui..." name="content" required>{{ old('content') }}</textarea>
                             @error('content')
                                 <div class="invalid-feedback">{{ $message }}</div>

@@ -69,4 +69,6 @@ class PostController extends Controller
         return redirect()->route('post.show', $post->slug)
             ->with('success', 'Comentário enviado com sucesso! Ele será publicado após aprovação.');
     }
+
+    
 }
