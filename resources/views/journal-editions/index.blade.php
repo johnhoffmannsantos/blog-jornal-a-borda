@@ -21,7 +21,6 @@
                 <a href="{{ route('journal-editions.show', $edition->slug) }}" class="edition-link">
                     <div class="edition-cover">
                         @if($edition->cover_image)
-                        <!-- <img src="{{ $edition->cover_image }}" alt="{{ $edition->title }}" class="img-fluid"> -->
                          <img
                             src="{{ asset('storage/' . $edition->cover_image) }}"
                             alt="{{ $edition->title }}"
