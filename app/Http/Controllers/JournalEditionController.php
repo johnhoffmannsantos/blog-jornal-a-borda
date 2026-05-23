@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JournalEdition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class JournalEditionController extends Controller
 {
@@ -20,7 +21,7 @@ class JournalEditionController extends Controller
     public function show($slug)
     {
         $edition = JournalEdition::where('slug', $slug)->firstOrFail();
-        
+
         // Incrementar visualizações
         $edition->incrementViews();
 
@@ -30,15 +31,16 @@ class JournalEditionController extends Controller
     public function download($slug)
     {
         $edition = JournalEdition::where('slug', $slug)->firstOrFail();
-        
+
         // Incrementar downloads
         $edition->incrementDownloads();
 
         // Obter caminho do arquivo
         $filePath = str_replace(Storage::disk('public')->url(''), '', $edition->pdf_file);
-        
+
         if (Storage::disk('public')->exists($filePath)) {
-            return Storage::disk('public')->download($filePath, $edition->title . '.pdf');
+            $fileName = Str::slug($edition->title) . '.pdf';
+            return Storage::disk('public')->download($filePath, $fileName);
         }
 
         abort(404, 'Arquivo não encontrado');
