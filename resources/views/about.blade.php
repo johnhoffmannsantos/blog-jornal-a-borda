@@ -26,7 +26,7 @@
                 <div class="card-body p-5">
                     <div class="row align-items-center mb-5">
                         <div class="col-md-6 mb-4 mb-md-0">
-                            <img src="https://via.placeholder.com/600x400/e63946/ffffff?text=Visao+do+Bairro" 
+                            <img src="{{ asset('/images/sobre-nos.jpeg') }}"
                                  class="img-fluid rounded" alt="Visão do Bairro" style="box-shadow: var(--shadow-md);">
                         </div>
                         <div class="col-md-6">

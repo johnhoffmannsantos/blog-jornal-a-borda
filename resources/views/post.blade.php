@@ -86,22 +86,34 @@
                     <div class="row g-3">
                         @if($previousPost)
                         <div class="col-md-6">
-                            <div class="post-previous">
-                                <small class="text-muted d-block mb-2">← Post Anterior</small>
-                                <a href="{{ route('post.show', $previousPost->slug) }}" class="text-decoration-none text-dark fw-bold">
+                            <a href="{{ route('post.show', $previousPost->slug) }}"
+                            class="post-previous d-block text-decoration-none text-dark">
+
+                                <small class="text-muted d-block mb-2">
+                                    ← Post Anterior
+                                </small>
+
+                                <span class="fw-bold">
                                     {{ Str::limit($previousPost->title, 60) }}
-                                </a>
-                            </div>
+                                </span>
+
+                            </a>
                         </div>
                         @endif
                         @if($nextPost)
                         <div class="col-md-6 {{ !$previousPost ? 'offset-md-6' : '' }}">
-                            <div class="post-next text-end">
-                                <small class="text-muted d-block mb-2">Próximo Post →</small>
-                                <a href="{{ route('post.show', $nextPost->slug) }}" class="text-decoration-none text-dark fw-bold">
+                            <a href="{{ route('post.show', $nextPost->slug) }}"
+                            class="post-next d-block text-decoration-none text-dark text-end">
+
+                                <small class="text-muted d-block mb-2">
+                                    Próximo Post →
+                                </small>
+
+                                <span class="fw-bold">
                                     {{ Str::limit($nextPost->title, 60) }}
-                                </a>
-                            </div>
+                                </span>
+
+                            </a>
                         </div>
                         @endif
                     </div>
