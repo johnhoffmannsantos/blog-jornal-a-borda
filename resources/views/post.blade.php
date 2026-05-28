@@ -228,4 +228,21 @@
         </div>
     </div>
 </div>
+
+<style>
+    .author-box img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        object-position: center;
+    }
+    .entry-content img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 20px auto;
+        border-radius: 5px;
+    }
+</style>
+
 @endsection
