@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\Tag; 
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -20,6 +21,9 @@ class CategoryController extends Controller
 
         $categories = Category::withCount('posts')->orderBy('name')->get();
 
-        return view('category', compact('category', 'posts', 'categories'));
+        $tags = Tag::withCount('posts')->orderBy('name')->get();
+        
+      
+        return view('category', compact('category', 'posts', 'categories', 'tags'));
     }
 }

@@ -20,7 +20,9 @@ class TagController extends Controller
 
         $categories = Category::withCount('posts')->orderBy('name')->get();
 
-        return view('tag', compact('tag', 'posts', 'categories'));
+        $tags = Tag::withCount('posts')->orderBy('name')->get();
+        
+        
+        return view('tag', compact('tag', 'posts', 'categories', 'tags'));
     }
 }
-
