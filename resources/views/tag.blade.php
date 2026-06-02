@@ -10,9 +10,7 @@
 @section('content')
 <div class="container">
     <div class="row">
-        <!-- Main Content -->
         <div class="col-lg-8 col-md-12">
-            <!-- Category Header -->
             <div class="category-header mb-5">
                 <div class="d-flex align-items-center mb-3">
                     <i class="bi bi-tags me-2" style="font-size: 2rem; color: var(--primary-color);"></i>
@@ -24,7 +22,6 @@
                 </p>
             </div>
 
-            <!-- Posts Grid -->
             <div class="posts-grid">
                 <div class="row">
                     @forelse($posts as $post)
@@ -77,7 +74,6 @@
                     @endforelse
                 </div>
 
-                <!-- Pagination -->
                 @if($posts->hasPages())
                 <div class="d-flex justify-content-center mt-5">
                     {{ $posts->links() }}
@@ -86,28 +82,23 @@
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-12 mt-5 mt-lg-0">
             <div class="sidebar">
-                <!-- Categories Widget -->
-                <div class="widget mb-4">
-                    <h4 class="widget-title">
-                        <i class="bi bi-folder me-2"></i>Categorias
-                    </h4>
-                    <ul class="widget-list">
-                        @foreach($categories as $category)
-                        <li>
-                            <a href="{{ route('category.show', $category->slug) }}">
-                                {{ $category->name }}
-                                <span class="badge bg-secondary float-end">{{ $category->posts_count }}</span>
-                            </a>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
+                <h4>
+                    <i class="bi bi-tags me-2"></i>Categorias
+                </h4>
+                <ul class="list-unstyled">
+                    @foreach($categories as $cat)
+                    <li>
+                        <a href="{{ route('category.show', $cat->slug) }}">
+                            <span>{{ $cat->name }}</span>
+                            <span class="badge">{{ $cat->posts_count }}</span>
+                        </a>
+                    </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
     </div>
 </div>
 @endsection
-
