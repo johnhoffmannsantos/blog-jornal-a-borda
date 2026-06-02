@@ -82,23 +82,40 @@
             </div>
         </div>
 
-        <div class="col-lg-4 col-md-12 mt-5 mt-lg-0">
-            <div class="sidebar">
-                <h4>
-                    <i class="bi bi-tags me-2"></i>Categorias
-                </h4>
-                <ul class="list-unstyled">
-                    @foreach($categories as $cat)
-                    <li>
-                        <a href="{{ route('category.show', $cat->slug) }}">
-                            <span>{{ $cat->name }}</span>
-                            <span class="badge">{{ $cat->posts_count }}</span>
-                        </a>
-                    </li>
-                    @endforeach
-                </ul>
+<div class="col-lg-4 col-md-12 mt-5 mt-lg-0">
+    <div class="sidebar">
+        
+        <div class="widget mb-4">
+            <h4>
+                <i class="bi bi-folder me-2"></i>Categorias
+            </h4>
+            <ul class="list-unstyled">
+                @foreach($categories as $cat)
+                <li>
+                    <a href="{{ route('category.show', $cat->slug) }}">
+                        <span>{{ $cat->name }}</span>
+                        <span class="badge">{{ $cat->posts_count }}</span>
+                    </a>
+                </li>
+                @endforeach
+            </ul>
+        </div>
+
+        <div class="widget mt-4">
+            <h4>
+                <i class="bi bi-tags me-2"></i>Filtrar por Tags
+            </h4>
+            <div class="d-flex flex-wrap gap-2 pt-2">
+                @foreach($tags as $t)
+                    <a href="{{ route('tag.show', $t->slug) }}" 
+                       class="btn btn-sm {{ isset($tag) && $t->id === $tag->id ? 'btn-primary fw-bold' : 'btn-outline-secondary' }} rounded-pill">
+                        #{{ $t->name }}
+                        <span class="badge ms-1 bg-light text-dark text-xs">{{ $t->posts_count ?? $t->posts()->count() }}</span>
+                    </a>
+                @endforeach
             </div>
         </div>
+
     </div>
 </div>
 @endsection
