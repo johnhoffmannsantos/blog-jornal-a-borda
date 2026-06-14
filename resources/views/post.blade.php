@@ -13,7 +13,6 @@
     <div class="row">
         <div class="col-lg-8 col-md-12">
             <article class="post-single">
-                <!-- Header -->
                 <header class="entry-header mb-4">
                     <div class="mb-3">
                         <a class="post-cat" href="{{ route('category.show', $post->category->slug) }}">
@@ -37,17 +36,23 @@
                     </ul>
                 </header>
 
-                <!-- Featured Image -->
                 <div class="post-media mb-5">
-                    <img src="{{ $post->featured_image ?? 'https://via.placeholder.com/1200x600?text=Sem+Imagem' }}" alt="{{ $post->title }}">
+                    @if($post->featured_image)
+                        <img src="{{ $post->featured_image }}" alt="{{ $post->title }}" class="img-fluid rounded w-100" style="max-height: 500px; object-fit: cover;">
+                    @else
+                        <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded" style="height: 350px; border: 2px dashed #dee2e6;">
+                            <div class="text-center">
+                                <i class="bi bi-image fs-1 d-block mb-2 text-secondary"></i>
+                                <span>Matéria sem imagem de capa</span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
-                <!-- Content -->
                 <div class="post-body">
                     <div class="entry-content">
                         {!! $post->content !!}
 
-                        <!-- Tags -->
                         @if($post->tags->count() > 0)
                         <div class="post-footer mt-5 pt-4 border-top">
                             <div class="d-flex flex-wrap align-items-center gap-2">
@@ -63,7 +68,6 @@
                     </div>
                 </div>
 
-                <!-- Author Box -->
                 <div class="author-box mt-5">
                     <div class="row align-items-center">
                         <div class="col-auto">
@@ -81,22 +85,18 @@
                     </div>
                 </div>
 
-                <!-- Post Navigation -->
                 <nav class="post-navigation">
                     <div class="row g-3">
                         @if($previousPost)
                         <div class="col-md-6">
                             <a href="{{ route('post.show', $previousPost->slug) }}"
                             class="post-previous d-block text-decoration-none text-dark">
-
                                 <small class="text-muted d-block mb-2">
                                     ← Post Anterior
                                 </small>
-
                                 <span class="fw-bold">
                                     {{ Str::limit($previousPost->title, 60) }}
                                 </span>
-
                             </a>
                         </div>
                         @endif
@@ -104,22 +104,18 @@
                         <div class="col-md-6 {{ !$previousPost ? 'offset-md-6' : '' }}">
                             <a href="{{ route('post.show', $nextPost->slug) }}"
                             class="post-next d-block text-decoration-none text-dark text-end">
-
                                 <small class="text-muted d-block mb-2">
                                     Próximo Post →
                                 </small>
-
                                 <span class="fw-bold">
                                     {{ Str::limit($nextPost->title, 60) }}
                                 </span>
-
                             </a>
                         </div>
                         @endif
                     </div>
                 </nav>
 
-                <!-- Comments Section -->
                 <div id="comments" class="mt-5">
                     <h3 class="mb-4">
                         <i class="bi bi-chat-dots me-2"></i>Comentários
@@ -128,7 +124,6 @@
                         @endif
                     </h3>
 
-                    <!-- Lista de Comentários Aprovados -->
                     @if($post->comments->count() > 0)
                     <div class="comments-list mb-5">
                         @foreach($post->comments as $comment)
@@ -209,14 +204,16 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Website (opcional)</label>
-                            <input type="url" class="form-control @error('author_url') is-invalid @enderror"
-                                   placeholder="https://seu-site.com" name="author_url"
-                                   value="{{ old('author_url') }}">
-                            @error('author_url')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Website (opcional)</label>
+                                <input type="url" class="form-control @error('author_url') is-invalid @enderror"
+                                       placeholder="https://seu-site.com" name="author_url"
+                                       value="{{ old('author_url') }}">
+                                @error('author_url')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Comentário *</label>
@@ -234,7 +231,6 @@
             </article>
         </div>
 
-        <!-- Sidebar -->
         <div class="col-lg-4 col-md-12 mt-5 mt-lg-0">
             @include('partials.sidebar')
         </div>
@@ -256,5 +252,4 @@
         border-radius: 5px;
     }
 </style>
-
 @endsection
