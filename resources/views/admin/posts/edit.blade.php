@@ -14,8 +14,8 @@
         <a href="{{ route('admin.posts.preview', $post->id) }}" target="_blank" class="btn btn-outline-info me-2">
             <i class="bi bi-eye me-2"></i>Ver Post
         </a>
-        <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-2"></i>Voltar
+        <a href="{{ route('admin.posts.index', session('admin_posts_filters', [])) }}" class="btn btn-outline-secondary">
+            Cancelar e Voltar
         </a>
     </div>
 </div>

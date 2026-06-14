@@ -105,7 +105,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-check2-circle me-1"></i>Aplicar filtros
                 </button>
-                <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">Limpar tudo</a>
+                <a href="{{ route('admin.posts.index', ['clear' => 1]) }}" class="btn btn-outline-secondary">Limpar tudo</a>
             </div>
         </form>
     </div>
