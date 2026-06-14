@@ -53,13 +53,24 @@ class PostController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        $posts = $query->orderBy('created_at', 'desc')->paginate(15);
+        // 1. Procura os posts no banco ordenados por data de criação
+        $postsPaginated = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // 2. ✨ REORDENAÇÃO COMPATÍVEL COM QUALQUER BANCO DE DADOS (PHP Collection)
+        // Separa os dados antes de renderizar e força o Rascunho ('draft') para o topo
+        $sortedItems = $postsPaginated->getCollection()->sortBy(function ($post) {
+            return $post->status === 'published' ? 1 : 0;
+        });
+
+        // 3. Devolve a coleção reordenada mantendo a paginação intacta
+        $posts = $postsPaginated->setCollection($sortedItems);
+
         $categories = Category::all();
 
         return view('admin.posts.index', compact('posts', 'categories', 'stats'));
     }
 
-        public function preview($id)
+    public function preview($id)
     {
         $post = Post::with(['author', 'category', 'tags', 'comments.replies'])
             ->findOrFail($id);
