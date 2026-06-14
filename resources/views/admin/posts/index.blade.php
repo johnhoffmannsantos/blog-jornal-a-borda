@@ -184,7 +184,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($posts as $post)
+                @forelse($posts->sortBy(fn($p) => $p->status === 'published' ? 1 : 0) as $post)
                 <tr>
                     <td>
                         <img src="{{ $post->featured_image ?? 'https://via.placeholder.com/60x60' }}" 
