@@ -33,9 +33,12 @@ class ImageUploadController extends Controller
             // Salvar no storage público
             $path = $file->storeAs('posts/images', $filename, 'public');
             
-            // Retornar URL da imagem para o TinyMCE
+            // ✨ SOLUÇÃO DEFINITIVA: Retornar URL relativa para o TinyMCE (/storage/...)
+            // Remove o "http://localhost" ou o domínio oficial, salvando apenas o caminho universal
+            $location = '/storage/' . $path;
+            
             return response()->json([
-                'location' => Storage::disk('public')->url($path)
+                'location' => $location
             ]);
         } catch (\Exception $e) {
             return response()->json([
