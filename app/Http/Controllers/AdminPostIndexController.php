@@ -18,6 +18,26 @@ class AdminPostIndexController extends Controller
     {
         $user = Auth::user();
 
+        // 🔴 RESET: Se vier o comando clear, limpa a sessão na hora
+        if ($request->has('clear')) {
+            session()->forget('admin_posts_filters');
+            return redirect()->route('admin.posts.index');
+        }
+
+        // 1. Definição das chaves de filtros reais que queremos monitorar e persistir
+        $filterKeys = ['search', 'status', 'visibility', 'category', 'author', 'published_from', 'published_to', 'dir', 'page'];
+
+        // 2. DETECÇÃO DE SESSÃO: Se o usuário acessou a página SEM nenhum filtro ativo na URL
+        // mas nós temos o histórico guardado na sessão, nós forçamos o redirecionamento injetando os filtros.
+        if (!$request->filled('status') && !$request->filled('search') && !$request->filled('category') && !$request->filled('visibility') && session()->has('admin_posts_filters')) {
+            return redirect()->route('admin.posts.index', session('admin_posts_filters'));
+        }
+
+        // 3. Se ele preencheu algum filtro ou mudou de página, atualizamos a memória da sessão
+        if ($request->anyFilled(['status', 'search', 'category', 'visibility']) || $request->has('page')) {
+            session(['admin_posts_filters' => $request->only($filterKeys)]);
+        }
+
         $searchTrim = trim((string) $request->input('search', ''));
 
         $request->merge([
@@ -97,7 +117,16 @@ class AdminPostIndexController extends Controller
         $query->orderByRaw('published_at IS NULL ASC')
             ->orderBy('published_at', $dir);
 
-        $posts = $query->paginate(15)->withQueryString();
+        // 1. Pagina os dados injetando a QueryString para os links de página funcionarem
+        $postsPaginated = $query->paginate(15)->withQueryString();
+
+        // 2. ✨ REORDENAÇÃO COMPATÍVEL (PHP Collection): Garante os rascunhos no topo visual da página atual
+        $sortedItems = $postsPaginated->getCollection()->sortBy(function ($post) {
+            return $post->status === 'published' ? 1 : 0;
+        });
+
+        // 3. Substitui os itens originais pelos itens reordenados
+        $posts = $postsPaginated->setCollection($sortedItems);
 
         $categories = Category::all();
         $authors = $user->canManageAllPosts()

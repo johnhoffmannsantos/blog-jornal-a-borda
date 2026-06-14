@@ -18,6 +18,27 @@ class PostController extends Controller
     {
         $user = Auth::user();
 
+        // 🔴 RESET: Se vier o comando clear, limpa a sessão na hora
+        if ($request->has('clear')) {
+            session()->forget('admin_posts_filters');
+            return redirect()->route('admin.posts.index');
+        }
+
+        // 1. Definição das chaves de filtros reais que queremos monitorar e persistir
+        $filterKeys = ['search', 'status', 'visibility', 'category', 'author', 'published_from', 'published_to', 'dir', 'page'];
+
+        // 2. ✨ DETECÇÃO PRECISA: Se o usuário acessou a página SEM nenhum filtro ativo na URL
+        // mas nós temos o histórico guardado na sessão, nós forçamos o redirecionamento injetando os filtros.
+        if (!$request->filled('status') && !$request->filled('search') && !$request->filled('category') && !$request->filled('visibility') && session()->has('admin_posts_filters')) {
+            return redirect()->route('admin.posts.index', session('admin_posts_filters'));
+        }
+
+        // 3. Se ele preencheu algum filtro ou mudou de página, atualizamos a memória da sessão
+        if ($request->anyFilled(['status', 'search', 'category', 'visibility']) || $request->has('page')) {
+            // Guarda estritamente as chaves válidas, descartando tokens ou inputs ocultos do HTML
+            session(['admin_posts_filters' => $request->only($filterKeys)]);
+        }
+
         $query = Post::with(['author', 'category', 'tags']);
 
         // Query base para estatísticas (sem filtros de busca/filtro)
@@ -56,8 +77,7 @@ class PostController extends Controller
         // 1. Procura os posts no banco ordenados por data de criação
         $postsPaginated = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        // 2. ✨ REORDENAÇÃO COMPATÍVEL COM QUALQUER BANCO DE DADOS (PHP Collection)
-        // Separa os dados antes de renderizar e força o Rascunho ('draft') para o topo
+        // 2. REORDENAÇÃO COMPATÍVEL COM QUALQUER BANCO DE DADOS (PHP Collection)
         $sortedItems = $postsPaginated->getCollection()->sortBy(function ($post) {
             return $post->status === 'published' ? 1 : 0;
         });
@@ -67,7 +87,10 @@ class PostController extends Controller
 
         $categories = Category::all();
 
-        return view('admin.posts.index', compact('posts', 'categories', 'stats'));
+        // Garante que a variável $authors exigida no seu formulário offcanvas seja injetada corretamente
+        $authors = Auth::user()->isAdmin() ? \App\Models\User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
+
+        return view('admin.posts.index', compact('posts', 'categories', 'stats', 'authors'));
     }
 
     public function preview($id)
@@ -161,6 +184,8 @@ class PostController extends Controller
             $post->tags()->attach($validated['tags']);
         }
 
+        session()->forget('admin_posts_filters');
+
         return redirect()->route('admin.posts.index')->with('success', 'Post criado com sucesso!');
     }
 
@@ -168,7 +193,6 @@ class PostController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para ver este post.');
         }
@@ -180,7 +204,6 @@ class PostController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para editar este post.');
         }
@@ -197,7 +220,6 @@ class PostController extends Controller
     {
         $user = Auth::user();
 
-        // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para editar este post.');
         }
@@ -273,21 +295,23 @@ class PostController extends Controller
             $post->tags()->detach();
         }
 
-        return redirect()->route('admin.posts.index')->with('success', 'Post atualizado com sucesso!');
+        // Pega a sessão salva e anexa no redirecionamento do update
+        $savedFilters = session('admin_posts_filters', []);
+        return redirect()->route('admin.posts.index', $savedFilters)->with('success', 'Post atualizado com sucesso!');
     }
 
     public function destroy(Post $post)
     {
         $user = Auth::user();
 
-        // Verificar permissão
         if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para excluir este post.');
         }
 
         $post->delete();
 
-        return redirect()->route('admin.posts.index')->with('success', 'Post excluído com sucesso!');
+        $savedFilters = session('admin_posts_filters', []);
+        return redirect()->route('admin.posts.index', $savedFilters)->with('success', 'Post excluído com sucesso!');
     }
 
     private function uniquePostSlug(string $title, ?int $ignorePostId = null): string
