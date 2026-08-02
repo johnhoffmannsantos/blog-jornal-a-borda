@@ -50,8 +50,8 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="role" class="form-label fw-semibold">Role *</label>
+                    <div class="col-md-4 mb-3">
+                        <label for="role" class="form-label fw-semibold">Permissão (Role) *</label>
                         <select class="form-select @error('role') is-invalid @enderror" 
                                 id="role" name="role" required>
                             <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Administrador</option>
@@ -67,8 +67,25 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="position" class="form-label fw-semibold">Cargo</label>
+                    <!-- NOVO CAMPO: Setor / Time -->
+                    <div class="col-md-4 mb-3">
+                        <label for="department" class="form-label fw-semibold">Setor / Time</label>
+                        <select class="form-select @error('department') is-invalid @enderror" id="department" name="department">
+                            <option value="">Selecione o setor...</option>
+                            <option value="Redação" {{ old('department', $user->department ?? '') === 'Redação' ? 'selected' : '' }}>Redação</option>
+                            <option value="Fotografia" {{ old('department', $user->department ?? '') === 'Fotografia' ? 'selected' : '' }}>Fotografia</option>
+                            <option value="Edição & Design" {{ old('department', $user->department ?? '') === 'Edição & Design' ? 'selected' : '' }}>Edição & Design</option>
+                            <option value="Tecnologia" {{ old('department', $user->department ?? '') === 'Tecnologia' ? 'selected' : '' }}>Tecnologia</option>
+                            <option value="Comercial & Marketing" {{ old('department', $user->department ?? '') === 'Comercial & Marketing' ? 'selected' : '' }}>Comercial & Marketing</option>
+                        </select>
+                        @error('department')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Campo Cargo Ajustado para 4 Colunas -->
+                    <div class="col-md-4 mb-3">
+                        <label for="position" class="form-label fw-semibold">Cargo / Função</label>
                         <input type="text" class="form-control @error('position') is-invalid @enderror" 
                                id="position" name="position" value="{{ old('position', $user->position) }}" 
                                placeholder="Ex: Redatora, Editor, etc.">
@@ -79,11 +96,11 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="bio" class="form-label fw-semibold">Biografia</label>
+                    <label for="bio" class="form-label fw-semibold">Resumo Profissional / Biografia</label>
                     <textarea class="form-control @error('bio') is-invalid @enderror" 
                               id="bio" name="bio" rows="4" 
-                              placeholder="Conte um pouco sobre este usuário...">{{ old('bio', $user->bio) }}</textarea>
-                    <small class="text-muted">Máximo 500 caracteres</small>
+                              placeholder="Escreva um breve resumo profissional sobre este membro...">{{ old('bio', $user->bio) }}</textarea>
+                    <small class="text-muted">Máximo 2000 caracteres</small>
                     @error('bio')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -103,7 +120,7 @@
                     <label for="avatar_file" class="form-label fw-semibold">Upload da Foto de Perfil</label>
                     <input type="file" class="form-control @error('avatar_file') is-invalid @enderror"
                            id="avatar_file" name="avatar_file" accept="image/*">
-                    <small class="text-muted">Formatos: JPEG, PNG, GIF, WebP. Maximo: 2MB.</small>
+                    <small class="text-muted">Formatos: JPEG, PNG, GIF, WebP. Máximo: 2MB.</small>
                     @error('avatar_file')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -179,6 +196,12 @@
             </div>
             <div class="py-3">
                 <div class="mb-3 pb-3 border-bottom">
+                    <p class="mb-1 text-muted small">Setor / Time</p>
+                    <p class="mb-0 fw-semibold text-primary">
+                        {{ $user->department ?? 'Não definido' }}
+                    </p>
+                </div>
+                <div class="mb-3 pb-3 border-bottom">
                     <p class="mb-1 text-muted small">Role Atual</p>
                     <p class="mb-0">
                         @php
@@ -188,7 +211,7 @@
                                 'author' => 'Autor',
                                 'reviewer' => 'Revisor',
                                 'social_media' => 'Social Media',
-                                'communication' => 'Comunicacao',
+                                'communication' => 'Comunicação',
                                 'designer' => 'Designer',
                                 default => ucfirst((string) $user->role),
                             };
@@ -236,4 +259,3 @@
 </script>
 @endpush
 @endsection
-

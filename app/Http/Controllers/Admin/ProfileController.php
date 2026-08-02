@@ -81,7 +81,7 @@ class ProfileController extends Controller
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-                'bio' => ['nullable', 'string', 'max:500'],
+                'bio' => ['nullable', 'string', 'max:2000'],
                 'position' => ['nullable', 'string', 'max:255'],
             ], [
                 'name.required' => 'O nome é obrigatório.',
@@ -90,7 +90,7 @@ class ProfileController extends Controller
                 'email.email' => 'O email deve ser válido.',
                 'email.max' => 'O email não pode ter mais de 255 caracteres.',
                 'email.unique' => 'Este email já está em uso.',
-                'bio.max' => 'A biografia não pode ter mais de 500 caracteres.',
+                'bio.max' => 'A biografia não pode ter mais de 2000 caracteres.',
                 'position.max' => 'O cargo não pode ter mais de 255 caracteres.',
             ]);
 

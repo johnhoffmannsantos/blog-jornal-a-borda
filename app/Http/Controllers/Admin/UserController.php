@@ -25,22 +25,45 @@ class UserController extends Controller
         
         $query = User::withCount('posts');
 
-        // Filtro por role
+        // Filtro por Permissão (Role)
         if ($request->has('role') && $request->role !== '') {
             $query->where('role', $request->role);
         }
 
-        // Busca
+        // Filtro por Setor / Time (Department)
+        if ($request->has('department') && $request->department !== '') {
+            $query->where('department', $request->department);
+        }
+
+        // Busca por Nome, Email ou Cargo
         if ($request->has('search') && $request->search !== '') {
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+                  ->orWhere('email', 'like', '%' . $request->search . '%')
+                  ->orWhere('position', 'like', '%' . $request->search . '%');
             });
         }
 
-        $users = $query->orderBy('name')->paginate(15);
+        // Busca ordenada por prioridade de Setor e por Nome
+        $users = $query->orderByRaw("
+            CASE 
+                WHEN department LIKE '%Redação%' THEN 1
+                WHEN department LIKE '%Fotografia%' THEN 2
+                WHEN department LIKE '%Edição%' THEN 3
+                WHEN department LIKE '%Tecnologia%' THEN 4
+                WHEN department LIKE '%Comercial%' THEN 5
+                WHEN department IS NOT NULL AND department != '' THEN 6
+                ELSE 7
+            END
+        ")->orderBy('name')->get();
 
-        return view('admin.users.index', compact('users'));
+        // Agrupa os usuários por setor para exibir categorizado no painel
+        $groupedUsers = $users->groupBy(function ($user) {
+            $dept = trim((string) $user->department);
+            return !empty($dept) ? $dept : 'Sem Setor Definido';
+        });
+
+        return view('admin.users.index', compact('users', 'groupedUsers'));
     }
 
     public function create()
@@ -55,24 +78,34 @@ class UserController extends Controller
         $this->checkAdmin();
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'string', 'in:admin,editor,author,reviewer,social_media,communication,designer'],
-            'position' => ['nullable', 'string', 'max:255'],
-            'bio' => ['nullable', 'string', 'max:500'],
-            'avatar' => ['nullable', 'url', 'max:500'],
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|max:255|unique:users,email',
+            'password'    => 'required|string|min:8|confirmed',
+            'role'        => 'required|string|in:admin,editor,author,reviewer,social_media,communication,designer',
+            'department'  => 'nullable|string|max:100',
+            'position'    => 'nullable|string|max:100',
+            'bio'         => 'nullable|string|max:2000',
+            'avatar'      => 'nullable|url|max:500',
+            'avatar_file' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
         ]);
 
+        $avatarUrl = $validated['avatar'] ?? null;
+
+        if ($request->hasFile('avatar_file')) {
+            $path = $request->file('avatar_file')->store('users/avatars', 'public');
+            $avatarUrl = Storage::disk('public')->url($path);
+        }
+
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-            'position' => $validated['position'] ?? null,
-            'bio' => $validated['bio'] ?? null,
-            'avatar' => $validated['avatar'] ?? null,
-            'is_active' => true, // Novos usuários são criados como ativos por padrão
+            'name'       => $validated['name'],
+            'email'      => $validated['email'],
+            'password'   => Hash::make($validated['password']),
+            'role'       => $validated['role'],
+            'department' => $validated['department'] ?? null,
+            'position'   => $validated['position'] ?? null,
+            'bio'        => $validated['bio'] ?? null,
+            'avatar'     => $avatarUrl,
+            'is_active'  => true,
         ]);
 
         return redirect()->route('admin.users.index')
@@ -83,7 +116,6 @@ class UserController extends Controller
     {
         $this->checkAdmin();
         
-        // Não permitir editar a si mesmo (deve usar o perfil)
         if ($user->id === Auth::id()) {
             return redirect()->route('admin.profile')
                 ->with('info', 'Para editar seu próprio perfil, use a página de Perfil.');
@@ -96,29 +128,30 @@ class UserController extends Controller
     {
         $this->checkAdmin();
         
-        // Não permitir editar a si mesmo
         if ($user->id === Auth::id()) {
             return redirect()->route('admin.profile')
                 ->with('info', 'Para editar seu próprio perfil, use a página de Perfil.');
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', 'string', 'in:admin,editor,author,reviewer,social_media,communication,designer'],
-            'position' => ['nullable', 'string', 'max:255'],
-            'bio' => ['nullable', 'string', 'max:500'],
-            'avatar' => ['nullable', 'url', 'max:500'],
+            'name'        => ['required', 'string', 'max:255'],
+            'email'       => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'role'        => ['required', 'string', 'in:admin,editor,author,reviewer,social_media,communication,designer'],
+            'department'  => ['nullable', 'string', 'max:100'],
+            'position'    => ['nullable', 'string', 'max:255'],
+            'bio'         => ['nullable', 'string', 'max:2000'],
+            'avatar'      => ['nullable', 'url', 'max:500'],
             'avatar_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
-            'password' => ['nullable', 'min:8', 'confirmed'],
+            'password'    => ['nullable', 'min:8', 'confirmed'],
         ]);
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->role = $validated['role'];
-        $user->position = $validated['position'] ?? null;
-        $user->bio = $validated['bio'] ?? null;
-        $user->avatar = $validated['avatar'] ?? null;
+        $user->name       = $validated['name'];
+        $user->email      = $validated['email'];
+        $user->role       = $validated['role'];
+        $user->department = $validated['department'] ?? null;
+        $user->position   = $validated['position'] ?? null;
+        $user->bio        = $validated['bio'] ?? null;
+        $user->avatar     = $validated['avatar'] ?? null;
 
         if ($request->hasFile('avatar_file')) {
             if ($user->avatar && str_contains($user->avatar, '/storage/users/avatars/')) {
@@ -146,12 +179,10 @@ class UserController extends Controller
     {
         $this->checkAdmin();
         
-        // Não permitir excluir a si mesmo
         if ($user->id === Auth::id()) {
             return back()->with('error', 'Você não pode excluir sua própria conta.');
         }
 
-        // Não permitir excluir se for o último admin
         if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
             return back()->with('error', 'Não é possível excluir o último administrador do sistema.');
         }
@@ -167,10 +198,8 @@ class UserController extends Controller
     {
         $this->checkAdmin();
         
-        // Verificar se é requisição AJAX/JSON
         $isAjax = request()->expectsJson() || request()->ajax() || request()->header('X-Requested-With') === 'XMLHttpRequest';
         
-        // Não permitir desativar a si mesmo
         if ($user->id === Auth::id()) {
             if ($isAjax) {
                 return response()->json(['success' => false, 'message' => 'Você não pode desativar sua própria conta.'], 403);
@@ -178,7 +207,6 @@ class UserController extends Controller
             return back()->with('error', 'Você não pode desativar sua própria conta.');
         }
 
-        // Não permitir desativar o último admin
         if ($user->isAdmin() && $user->is_active && User::where('role', 'admin')->where('is_active', true)->count() <= 1) {
             if ($isAjax) {
                 return response()->json(['success' => false, 'message' => 'Não é possível desativar o último administrador ativo do sistema.'], 403);
@@ -192,7 +220,6 @@ class UserController extends Controller
 
             $status = $user->is_active ? 'ativado' : 'desativado';
             
-            // Retornar JSON para requisições AJAX
             if ($isAjax) {
                 return response()->json([
                     'success' => true,

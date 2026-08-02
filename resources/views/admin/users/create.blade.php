@@ -25,7 +25,7 @@
                     <i class="bi bi-person me-2"></i>Informações do Usuário
                 </h5>
             </div>
-            <form method="POST" action="{{ route('admin.users.store') }}" id="userForm">
+            <form method="POST" action="{{ route('admin.users.store') }}" id="userForm" enctype="multipart/form-data">
                 @csrf
 
                 <div class="row">
@@ -49,8 +49,9 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="role" class="form-label fw-semibold">Role *</label>
+                    <!-- Permissão (Role) -->
+                    <div class="col-md-4 mb-3">
+                        <label for="role" class="form-label fw-semibold">Permissão (Role) *</label>
                         <select class="form-select @error('role') is-invalid @enderror" 
                                 id="role" name="role" required>
                             <option value="">Selecione uma role</option>
@@ -67,8 +68,25 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="position" class="form-label fw-semibold">Cargo</label>
+                    <!-- NOVO: Setor / Time -->
+                    <div class="col-md-4 mb-3">
+                        <label for="department" class="form-label fw-semibold">Setor / Time</label>
+                        <select class="form-select @error('department') is-invalid @enderror" id="department" name="department">
+                            <option value="">Selecione o setor...</option>
+                            <option value="Redação" {{ old('department') === 'Redação' ? 'selected' : '' }}>Redação</option>
+                            <option value="Fotografia" {{ old('department') === 'Fotografia' ? 'selected' : '' }}>Fotografia</option>
+                            <option value="Edição & Design" {{ old('department') === 'Edição & Design' ? 'selected' : '' }}>Edição & Design</option>
+                            <option value="Tecnologia" {{ old('department') === 'Tecnologia' ? 'selected' : '' }}>Tecnologia</option>
+                            <option value="Comercial & Marketing" {{ old('department') === 'Comercial & Marketing' ? 'selected' : '' }}>Comercial & Marketing</option>
+                        </select>
+                        @error('department')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Cargo / Função -->
+                    <div class="col-md-4 mb-3">
+                        <label for="position" class="form-label fw-semibold">Cargo / Função</label>
                         <input type="text" class="form-control @error('position') is-invalid @enderror" 
                                id="position" name="position" value="{{ old('position') }}" 
                                placeholder="Ex: Redatora, Editor, etc.">
@@ -79,11 +97,11 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="bio" class="form-label fw-semibold">Biografia</label>
+                    <label for="bio" class="form-label fw-semibold">Resumo Profissional / Biografia</label>
                     <textarea class="form-control @error('bio') is-invalid @enderror" 
                               id="bio" name="bio" rows="4" 
                               placeholder="Conte um pouco sobre este usuário...">{{ old('bio') }}</textarea>
-                    <small class="text-muted">Máximo 500 caracteres</small>
+                    <small class="text-muted">Máximo 2000 caracteres</small>
                     @error('bio')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -95,6 +113,16 @@
                            id="avatar" name="avatar" value="{{ old('avatar') }}" 
                            placeholder="https://exemplo.com/avatar.jpg">
                     @error('avatar')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label for="avatar_file" class="form-label fw-semibold">Upload da Foto de Perfil</label>
+                    <input type="file" class="form-control @error('avatar_file') is-invalid @enderror"
+                           id="avatar_file" name="avatar_file" accept="image/*">
+                    <small class="text-muted">Formatos: JPEG, PNG, GIF, WebP. Máximo: 2MB.</small>
+                    @error('avatar_file')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -142,6 +170,22 @@
         <div class="admin-card">
             <div class="card-header">
                 <h5>
+                    <i class="bi bi-image me-2"></i>Preview da Foto
+                </h5>
+            </div>
+            <div class="text-center py-4">
+                <img src="https://ui-avatars.com/api/?name=Novo+Usuario&size=200&background=1A25FF&color=fff" 
+                     alt="Preview Avatar" 
+                     id="avatarPreview"
+                     class="rounded-circle mb-3" 
+                     style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--border-color, #dee2e6);">
+                <p class="text-muted small mb-0">Preview do perfil que será criado</p>
+            </div>
+        </div>
+
+        <div class="admin-card mt-4">
+            <div class="card-header">
+                <h5>
                     <i class="bi bi-info-circle me-2"></i>Informações
                 </h5>
             </div>
@@ -163,8 +207,7 @@
                     <ul class="small mb-0 ps-3">
                         <li>O email deve ser único no sistema</li>
                         <li>A senha deve ter no mínimo 8 caracteres</li>
-                        <li>O avatar pode ser uma URL de imagem</li>
-                        <li>Se não informar avatar, será gerado automaticamente</li>
+                        <li>Você pode escolher o setor para agrupar o time na página pública</li>
                     </ul>
                 </div>
             </div>
@@ -174,12 +217,29 @@
 
 @push('scripts')
 <script>
-    // Preview do avatar
+    // Preview do avatar via URL
     document.getElementById('avatar').addEventListener('input', function() {
         const url = this.value;
-        // Pode adicionar preview aqui se necessário
+        const preview = document.getElementById('avatarPreview');
+        
+        if (url && url.startsWith('http')) {
+            preview.src = url;
+        } else if (!url) {
+            preview.src = 'https://ui-avatars.com/api/?name=Novo+Usuario&size=200&background=1A25FF&color=fff';
+        }
+    });
+
+    // Preview do avatar via Upload de Arquivo
+    document.getElementById('avatar_file').addEventListener('change', function() {
+        const file = this.files && this.files[0];
+        const preview = document.getElementById('avatarPreview');
+        if (!file || !preview) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     });
 </script>
 @endpush
 @endsection
-
