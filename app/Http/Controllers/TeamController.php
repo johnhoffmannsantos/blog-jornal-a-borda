@@ -9,7 +9,6 @@ class TeamController extends Controller
 {
     public function index()
     {
-        // Busca todos os usuários ativos ordenados por hierarquia de cargo e nome
         $users = User::where('is_active', true)
             ->orderByRaw("
                 CASE 
@@ -27,7 +26,6 @@ class TeamController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Agrupa estritamente por Setor (department), tratando espaços em branco
         $team = $users->groupBy(function ($user) {
             $dept = trim($user->department ?? '');
             return !empty($dept) ? $dept : 'Geral';
