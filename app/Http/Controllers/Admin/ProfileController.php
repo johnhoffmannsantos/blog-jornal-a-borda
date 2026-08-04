@@ -22,7 +22,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // Se está alterando senha, validar apenas campos de senha
+        // Se está alterando senha
         if ($request->filled('current_password')) {
             $validated = $request->validate([
                 'current_password' => ['required'],
@@ -40,7 +40,7 @@ class ProfileController extends Controller
 
             $user->password = Hash::make($validated['password']);
         }
-        // Se é apenas upload/remoção de avatar
+        // Se é upload ou remoção de avatar
         elseif ($request->hasFile('avatar') || $request->has('remove_avatar')) {
             $validated = $request->validate([
                 'avatar' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
@@ -51,53 +51,45 @@ class ProfileController extends Controller
                 'avatar.max' => 'A imagem não pode ter mais de 2MB.',
             ]);
 
-            // Remover avatar se solicitado
+            // Remover avatar antigo se solicitado
             if ($request->has('remove_avatar') && $request->remove_avatar) {
-                if ($user->avatar && str_contains($user->avatar, '/storage/avatars/')) {
-                    $oldPath = str_replace(Storage::disk('public')->url(''), '', $user->avatar);
-                    if (Storage::disk('public')->exists($oldPath)) {
-                        Storage::disk('public')->delete($oldPath);
-                    }
-                }
+                $this->deleteOldAvatar($user->avatar);
                 $user->avatar = null;
             }
-            // Processar upload de avatar se houver
+            // Processar upload de avatar
             elseif ($request->hasFile('avatar')) {
-                // Deletar avatar antigo se existir e for do nosso storage
-                if ($user->avatar && str_contains($user->avatar, '/storage/avatars/')) {
-                    $oldPath = str_replace(Storage::disk('public')->url(''), '', $user->avatar);
-                    if (Storage::disk('public')->exists($oldPath)) {
-                        Storage::disk('public')->delete($oldPath);
-                    }
-                }
-                
+                $this->deleteOldAvatar($user->avatar);
+
                 $file = $request->file('avatar');
                 $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('avatars', $filename, 'public');
+                $path = $file->storeAs('users/avatars', $filename, 'public');
                 $user->avatar = Storage::disk('public')->url($path);
             }
         } else {
-            // Se não está alterando senha nem avatar, validar e atualizar informações pessoais
+            // Atualizar dados do perfil (Nome, Email, Setor, Cargo, Bio)
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-                'bio' => ['nullable', 'string', 'max:500'],
-                'position' => ['nullable', 'string', 'max:255'],
+                'name'       => ['required', 'string', 'max:255'],
+                'email'      => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'department' => ['nullable', 'string', 'max:100'],
+                'position'   => ['nullable', 'string', 'max:255'],
+                'bio'        => ['nullable', 'string', 'max:2000'],
             ], [
-                'name.required' => 'O nome é obrigatório.',
-                'name.max' => 'O nome não pode ter mais de 255 caracteres.',
+                'name.required'  => 'O nome é obrigatório.',
+                'name.max'       => 'O nome não pode ter mais de 255 caracteres.',
                 'email.required' => 'O email é obrigatório.',
-                'email.email' => 'O email deve ser válido.',
-                'email.max' => 'O email não pode ter mais de 255 caracteres.',
-                'email.unique' => 'Este email já está em uso.',
-                'bio.max' => 'A biografia não pode ter mais de 500 caracteres.',
-                'position.max' => 'O cargo não pode ter mais de 255 caracteres.',
+                'email.email'    => 'O email deve ser válido.',
+                'email.max'      => 'O email não pode ter mais de 255 caracteres.',
+                'email.unique'   => 'Este email já está em uso.',
+                'department.max' => 'O setor não pode ter mais de 100 caracteres.',
+                'position.max'   => 'O cargo não pode ter mais de 255 caracteres.',
+                'bio.max'        => 'A biografia não pode ter mais de 2000 caracteres.',
             ]);
 
-            $user->name = $validated['name'];
-            $user->email = $validated['email'];
-            $user->bio = $validated['bio'] ?? null;
-            $user->position = $validated['position'] ?? null;
+            $user->name       = $validated['name'];
+            $user->email      = $validated['email'];
+            $user->department = $validated['department'] ?? null;
+            $user->position   = $validated['position'] ?? null;
+            $user->bio        = $validated['bio'] ?? null;
         }
 
         $user->save();
@@ -110,5 +102,18 @@ class ProfileController extends Controller
         }
 
         return redirect()->route('admin.profile')->with('success', $message);
+    }
+
+    /**
+     * Auxiliar para excluir o avatar antigo do storage se ele existir.
+     */
+    private function deleteOldAvatar(?string $avatarUrl): void
+    {
+        if ($avatarUrl && (str_contains($avatarUrl, '/storage/users/avatars/') || str_contains($avatarUrl, '/storage/avatars/'))) {
+            $oldPath = str_replace(Storage::disk('public')->url(''), '', $avatarUrl);
+            if (Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
     }
 }

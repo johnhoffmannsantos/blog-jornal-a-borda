@@ -3,12 +3,12 @@
 @section('title', 'Editar Usuário - Painel Administrativo')
 
 @section('content')
-<div class="page-header d-flex justify-content-between align-items-center">
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1>
+        <h1 class="h3 mb-1">
             <i class="bi bi-pencil me-2"></i>Editar Usuário
         </h1>
-        <p>Atualize as informações do usuário</p>
+        <p class="text-muted mb-0">Atualize as informações do usuário</p>
     </div>
     <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-2"></i>Voltar
@@ -19,9 +19,9 @@
 
 <div class="row">
     <div class="col-lg-8">
-        <div class="admin-card">
-            <div class="card-header">
-                <h5>
+        <div class="admin-card p-4">
+            <div class="card-header bg-transparent border-bottom mb-4 pb-3">
+                <h5 class="mb-0 fw-bold">
                     <i class="bi bi-person me-2"></i>Informações do Usuário
                 </h5>
             </div>
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label for="role" class="form-label fw-semibold">Role *</label>
                         <select class="form-select @error('role') is-invalid @enderror" 
                                 id="role" name="role" required>
@@ -67,7 +67,23 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
+                        <label for="department" class="form-label fw-semibold">Setor / Time</label>
+                        <select class="form-select @error('department') is-invalid @enderror" 
+                                id="department" name="department">
+                            <option value="">Selecione um Setor</option>
+                            <option value="Redação" {{ old('department', $user->department) === 'Redação' ? 'selected' : '' }}>Redação</option>
+                            <option value="Fotografia" {{ old('department', $user->department) === 'Fotografia' ? 'selected' : '' }}>Fotografia</option>
+                            <option value="Edição & Design" {{ old('department', $user->department) === 'Edição & Design' ? 'selected' : '' }}>Edição & Design</option>
+                            <option value="Tecnologia" {{ old('department', $user->department) === 'Tecnologia' ? 'selected' : '' }}>Tecnologia</option>
+                            <option value="Comercial & Marketing" {{ old('department', $user->department) === 'Comercial & Marketing' ? 'selected' : '' }}>Comercial & Marketing</option>
+                        </select>
+                        @error('department')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4 mb-3">
                         <label for="position" class="form-label fw-semibold">Cargo</label>
                         <input type="text" class="form-control @error('position') is-invalid @enderror" 
                                id="position" name="position" value="{{ old('position', $user->position) }}" 
@@ -83,7 +99,7 @@
                     <textarea class="form-control @error('bio') is-invalid @enderror" 
                               id="bio" name="bio" rows="4" 
                               placeholder="Conte um pouco sobre este usuário...">{{ old('bio', $user->bio) }}</textarea>
-                    <small class="text-muted">Máximo 500 caracteres</small>
+                    <small class="text-muted">Máximo 2000 caracteres</small>
                     @error('bio')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -103,7 +119,7 @@
                     <label for="avatar_file" class="form-label fw-semibold">Upload da Foto de Perfil</label>
                     <input type="file" class="form-control @error('avatar_file') is-invalid @enderror"
                            id="avatar_file" name="avatar_file" accept="image/*">
-                    <small class="text-muted">Formatos: JPEG, PNG, GIF, WebP. Maximo: 2MB.</small>
+                    <small class="text-muted">Formatos: JPEG, PNG, GIF, WebP. Máximo: 2MB.</small>
                     @error('avatar_file')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -111,7 +127,7 @@
 
                 <hr class="my-4">
 
-                <h5 class="mb-3">Alterar Senha</h5>
+                <h5 class="mb-3 fw-bold">Alterar Senha</h5>
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle me-2"></i>
                     <strong>Opcional:</strong> Deixe em branco para manter a senha atual.
@@ -149,18 +165,28 @@
     </div>
 
     <div class="col-lg-4">
-        <div class="admin-card">
-            <div class="card-header">
-                <h5>
+        <div class="admin-card p-4">
+            <div class="card-header bg-transparent border-bottom mb-3 pb-3">
+                <h5 class="mb-0 fw-bold">
                     <i class="bi bi-image me-2"></i>Foto de Perfil
                 </h5>
             </div>
-            <div class="text-center py-4">
-                <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=1A25FF&color=fff' }}" 
+            <div class="text-center py-3">
+                @php
+                    $avatarSrc = 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=1A25FF&color=fff';
+                    if (!empty($user->avatar)) {
+                        if (str_starts_with($user->avatar, 'http://') || str_starts_with($user->avatar, 'https://')) {
+                            $avatarSrc = $user->avatar;
+                        } else {
+                            $avatarSrc = asset('storage/' . ltrim(str_replace('/storage/', '', $user->avatar), '/'));
+                        }
+                    }
+                @endphp
+                <img src="{{ $avatarSrc }}" 
                      alt="{{ $user->name }}" 
                      id="avatarPreview"
-                     class="rounded-circle mb-3" 
-                     style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--border-color);">
+                     class="rounded-circle mb-3 border border-3 border-light shadow-sm" 
+                     style="width: 150px; height: 150px; object-fit: cover;">
                 <p class="text-muted small mb-0">
                     @if($user->avatar)
                         Foto personalizada
@@ -171,13 +197,13 @@
             </div>
         </div>
 
-        <div class="admin-card mt-4">
-            <div class="card-header">
-                <h5>
+        <div class="admin-card p-4 mt-4">
+            <div class="card-header bg-transparent border-bottom mb-3 pb-3">
+                <h5 class="mb-0 fw-bold">
                     <i class="bi bi-info-circle me-2"></i>Informações da Conta
                 </h5>
             </div>
-            <div class="py-3">
+            <div class="py-2">
                 <div class="mb-3 pb-3 border-bottom">
                     <p class="mb-1 text-muted small">Role Atual</p>
                     <p class="mb-0">
@@ -188,17 +214,23 @@
                                 'author' => 'Autor',
                                 'reviewer' => 'Revisor',
                                 'social_media' => 'Social Media',
-                                'communication' => 'Comunicacao',
+                                'communication' => 'Comunicação',
                                 'designer' => 'Designer',
                                 default => ucfirst((string) $user->role),
                             };
                         @endphp
-                        <span class="role-badge {{ $user->role }}">{{ $editRoleLabel }}</span>
+                        <span class="badge bg-secondary-subtle text-secondary border px-2 py-1">{{ $editRoleLabel }}</span>
+                    </p>
+                </div>
+                <div class="mb-3 pb-3 border-bottom">
+                    <p class="mb-1 text-muted small">Setor / Time</p>
+                    <p class="mb-0 fw-semibold text-primary">
+                        {{ $user->department ?? 'Não definido' }}
                     </p>
                 </div>
                 <div class="mb-3 pb-3 border-bottom">
                     <p class="mb-1 text-muted small">Membro desde</p>
-                    <p class="mb-0 fw-semibold">{{ $user->created_at->format('d/m/Y') }}</p>
+                    <p class="mb-0 fw-semibold">{{ $user->created_at ? $user->created_at->format('d/m/Y') : '—' }}</p>
                 </div>
                 <div class="mb-0">
                     <p class="mb-1 text-muted small">Total de Posts</p>
@@ -211,7 +243,7 @@
 
 @push('scripts')
 <script>
-    // Preview do avatar
+    // Preview do avatar por URL
     document.getElementById('avatar').addEventListener('input', function() {
         const url = this.value;
         const preview = document.getElementById('avatarPreview');
@@ -223,6 +255,7 @@
         }
     });
 
+    // Preview do avatar por upload de arquivo local
     document.getElementById('avatar_file').addEventListener('change', function() {
         const file = this.files && this.files[0];
         const preview = document.getElementById('avatarPreview');
@@ -236,4 +269,3 @@
 </script>
 @endpush
 @endsection
-

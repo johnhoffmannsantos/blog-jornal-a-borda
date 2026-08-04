@@ -83,7 +83,7 @@
                     <textarea class="form-control @error('bio') is-invalid @enderror" 
                               id="bio" name="bio" rows="4" 
                               placeholder="Conte um pouco sobre este usuário...">{{ old('bio') }}</textarea>
-                    <small class="text-muted">Máximo 500 caracteres</small>
+                    <small class="text-muted">Máximo 2000 caracteres</small>
                     @error('bio')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

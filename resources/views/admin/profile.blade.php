@@ -59,14 +59,32 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="position" class="form-label fw-semibold">Cargo</label>
-                            <input type="text" class="form-control @error('position') is-invalid @enderror" 
-                                   id="position" name="position" value="{{ old('position', $user->position) }}" 
-                                   placeholder="Ex: Redatora, Editor, etc.">
-                            @error('position')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="department" class="form-label fw-semibold">Setor / Time</label>
+                                <select class="form-select @error('department') is-invalid @enderror" 
+                                        id="department" name="department">
+                                    <option value="">Selecione um Setor</option>
+                                    <option value="Redação" {{ old('department', $user->department) === 'Redação' ? 'selected' : '' }}>Redação</option>
+                                    <option value="Fotografia" {{ old('department', $user->department) === 'Fotografia' ? 'selected' : '' }}>Fotografia</option>
+                                    <option value="Edição & Design" {{ old('department', $user->department) === 'Edição & Design' ? 'selected' : '' }}>Edição & Design</option>
+                                    <option value="Tecnologia" {{ old('department', $user->department) === 'Tecnologia' ? 'selected' : '' }}>Tecnologia</option>
+                                    <option value="Comercial & Marketing" {{ old('department', $user->department) === 'Comercial & Marketing' ? 'selected' : '' }}>Comercial & Marketing</option>
+                                </select>
+                                @error('department')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="position" class="form-label fw-semibold">Cargo</label>
+                                <input type="text" class="form-control @error('position') is-invalid @enderror" 
+                                       id="position" name="position" value="{{ old('position', $user->position) }}" 
+                                       placeholder="Ex: Redatora, Editor, etc.">
+                                @error('position')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="mb-4">
@@ -74,7 +92,7 @@
                             <textarea class="form-control @error('bio') is-invalid @enderror" 
                                       id="bio" name="bio" rows="5" 
                                       placeholder="Conte um pouco sobre você...">{{ old('bio', $user->bio) }}</textarea>
-                            <small class="text-muted">Máximo 500 caracteres</small>
+                            <small class="text-muted">Máximo 2000 caracteres</small>
                             @error('bio')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -150,8 +168,18 @@
                     
                     <div class="mb-3 position-relative">
                         <div class="position-relative d-inline-block">
+                            @php
+                                $profileAvatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=1A25FF&color=fff';
+                                if (!empty($user->avatar)) {
+                                    if (str_starts_with($user->avatar, 'http://') || str_starts_with($user->avatar, 'https://')) {
+                                        $profileAvatarUrl = $user->avatar;
+                                    } else {
+                                        $profileAvatarUrl = asset('storage/' . ltrim(str_replace('/storage/', '', $user->avatar), '/'));
+                                    }
+                                }
+                            @endphp
                             <img id="avatarPreview" 
-                                 src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&size=200&background=1A25FF&color=fff' }}" 
+                                 src="{{ $profileAvatarUrl }}" 
                                  alt="{{ $user->name }}" 
                                  class="rounded-circle mb-3" 
                                  style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--border-color); cursor: pointer; transition: opacity 0.3s;"
@@ -212,7 +240,7 @@
                                 'author' => 'Autor',
                                 'reviewer' => 'Revisor',
                                 'social_media' => 'Social Media',
-                                'communication' => 'Comunicacao',
+                                'communication' => 'Comunicação',
                                 'designer' => 'Designer',
                                 default => ucfirst((string) $user->role),
                             };
@@ -221,8 +249,14 @@
                     </p>
                 </div>
                 <div class="mb-3 pb-3 border-bottom">
+                    <p class="mb-1 text-muted small">Setor / Time</p>
+                    <p class="mb-0 fw-semibold text-primary">
+                        {{ $user->department ?? 'Não definido' }}
+                    </p>
+                </div>
+                <div class="mb-3 pb-3 border-bottom">
                     <p class="mb-1 text-muted small">Membro desde</p>
-                    <p class="mb-0 fw-semibold">{{ $user->created_at->format('d/m/Y') }}</p>
+                    <p class="mb-0 fw-semibold">{{ $user->created_at ? $user->created_at->format('d/m/Y') : '—' }}</p>
                 </div>
                 <div class="mb-0">
                     <p class="mb-1 text-muted small">Total de Posts</p>
