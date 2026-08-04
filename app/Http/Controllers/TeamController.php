@@ -27,16 +27,10 @@ class TeamController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Agrupa primeiramente por Setor (department).
-        // Se o usuário não tiver Setor preenchido, usa o Cargo (position) ou 'Colaboradores'
+        // Agrupa estritamente por Setor (department), tratando espaços em branco
         $team = $users->groupBy(function ($user) {
-            if (!empty($user->department)) {
-                return $user->department;
-            }
-            if (!empty($user->position)) {
-                return $user->position;
-            }
-            return 'Colaboradores';
+            $dept = trim($user->department ?? '');
+            return !empty($dept) ? $dept : 'Geral';
         });
 
         return view('team', compact('team'));
