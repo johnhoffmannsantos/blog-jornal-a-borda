@@ -1,0 +1,18 @@
+name: Forçar Deploy Manual
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # <-- Isso cria o botão "Run workflow"
+
+jobs:
+  forcar-atualizacao:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixando o código do repositório
+        uses: actions/checkout@v4
+
+      - name: Confirmação de Disparo
+        run: |
+          echo "O gatilho manual foi ativado com sucesso!"
+          echo "Se você tem webhooks ou outras actions configuradas, elas estão rodando agora."
