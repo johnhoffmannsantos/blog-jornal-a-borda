@@ -95,3 +95,5 @@ Route::post('/{slug}/comentario', [PostController::class, 'storeComment'])->name
 
 // Post Route (must be last)
 Route::get('/{slug}', [PostController::class, 'show'])->name('post.show');
+
+// Deploy trigger: layout equipe e filtros atualizados
