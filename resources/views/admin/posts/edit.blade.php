@@ -25,9 +25,7 @@
     @method('PUT')
 
     <div class="row">
-        <!-- Coluna Principal - Conteúdo -->
         <div class="col-lg-8">
-            <!-- Card Principal -->
             <div class="admin-card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5>
@@ -90,14 +88,13 @@
                 </div>
             </div>
 
-            <!-- Informações Adicionais -->
             <div class="admin-card mb-4">
                 <div class="card-header">
                     <h5>
                         <i class="bi bi-info-circle me-2"></i>Informações do Post
                     </h5>
                 </div>
-                @if(auth()->user()->isAdmin())
+                @if(auth()->user()->canManageAllPosts())
                 <div class="mb-3">
                     <label for="author_id" class="form-label fw-semibold">Autor</label>
                     <select class="form-select @error('author_id') is-invalid @enderror"
@@ -144,9 +141,7 @@
             </div>
         </div>
 
-        <!-- Coluna Lateral - Configurações -->
         <div class="col-lg-4">
-            <!-- Card de Publicação -->
             <div class="admin-card mb-4">
                 <div class="card-header">
                     <h5>
@@ -207,7 +202,6 @@
                 </div>
             </div>
 
-            <!-- Card de Categoria -->
             <div class="admin-card mb-4">
                 <div class="card-header">
                     <h5>
@@ -233,7 +227,6 @@
                 </div>
             </div>
 
-            <!-- Card de Imagem -->
             <div class="admin-card mb-4">
                 <div class="card-header">
                     <h5>
@@ -266,7 +259,6 @@
                 </div>
             </div>
 
-            <!-- Card de Tags -->
             <div class="admin-card mb-4">
                 <div class="card-header">
                     <h5>
@@ -341,7 +333,6 @@
 @push('scripts')
 <script src="{{ asset('tinymce/js/tinymce/tinymce.min.js') }}"></script>
 <script>
-    // Inicializar TinyMCE
     tinymce.init({
         selector: '#content',
         language: 'pt-BR',
@@ -418,7 +409,6 @@
         }
     });
 
-    // Contador de caracteres
     document.getElementById('title').addEventListener('input', function() {
         document.getElementById('title-count').textContent = this.value.length + ' caracteres';
     });
@@ -433,7 +423,6 @@
         }
     });
 
-    // Preview de imagem (upload)
     const featuredImageFile = document.getElementById('featured_image_file');
     if (featuredImageFile) {
         featuredImageFile.addEventListener('change', function(e) {
@@ -457,6 +446,7 @@
     const statusEl = document.getElementById('status');
     const publishedAtDate = document.getElementById('published_at_date');
     const publishedAtTimeInput = document.getElementById('published_at_time');
+
     function normalizeTime24h(el) {
         if (!el) return;
         const digits = el.value.replace(/\D/g, '').slice(0, 4);
@@ -464,9 +454,11 @@
             el.value = digits.slice(0, 2) + ':' + digits.slice(2, 4);
         }
     }
+
     if (publishedAtTimeInput) {
         publishedAtTimeInput.addEventListener('blur', function() { normalizeTime24h(this); });
     }
+
     function syncPublishFields() {
         if (!statusEl || !publishedAtDate || !publishedAtTimeInput) return;
         publishedAtDate.removeAttribute('required');
@@ -476,16 +468,20 @@
             publishedAtTimeInput.setAttribute('required', 'required');
         }
     }
+
     if (statusEl) {
         statusEl.addEventListener('change', syncPublishFields);
         syncPublishFields();
     }
 
-    // Validação antes de enviar
     document.getElementById('postForm').addEventListener('submit', function(e) {
         const form = this;
         normalizeTime24h(document.getElementById('published_at_time'));
-        // Primeiro, deixa o browser validar os campos "normais"
+
+        if (typeof tinymce.triggerSave === 'function') {
+            tinymce.triggerSave();
+        }
+
         if (!form.checkValidity()) {
             e.preventDefault();
             e.stopPropagation();
@@ -494,7 +490,6 @@
         }
 
         const title = document.getElementById('title').value.trim();
-        // Obter conteúdo do TinyMCE
         const editor = tinymce.get('content');
         const contentText = editor ? editor.getContent({ format: 'text' }).trim() : '';
 
@@ -507,11 +502,6 @@
             }
             if (editor && !contentText) editor.focus();
             return false;
-        }
-
-        // Sincroniza conteúdo do TinyMCE com o textarea antes de enviar
-        if (typeof tinymce.triggerSave === 'function') {
-            tinymce.triggerSave();
         }
     });
 </script>

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -26,6 +25,7 @@ class User extends Authenticatable
         'bio',
         'avatar',
         'position',
+        'department',
         'is_active',
     ];
 
@@ -60,17 +60,19 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return strtolower(trim((string) $this->role)) === 'admin';
     }
 
     public function isEditor(): bool
     {
-        return $this->role === 'editor';
+        $role = strtolower(trim((string) $this->role));
+        return in_array($role, ['editor', 'redator']);
     }
 
     public function isAuthor(): bool
     {
-        return $this->role === 'author';
+        $role = strtolower(trim((string) $this->role));
+        return in_array($role, ['author', 'autor']);
     }
 
     public function canManageAllPosts(): bool
