@@ -14,6 +14,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Roles aceitas pelo sistema (mesma lista validada no UserController).
+     */
+    public const ROLES = [
+        'admin',
+        'editor',
+        'author',
+        'reviewer',
+        'social_media',
+        'communication',
+        'designer',
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -26,6 +39,7 @@ class User extends Authenticatable
         'bio',
         'avatar',
         'position',
+        'department',
         'is_active',
     ];
 
@@ -73,7 +87,25 @@ class User extends Authenticatable
         return $this->role === 'author';
     }
 
+    public function isReviewer(): bool
+    {
+        return $this->role === 'reviewer';
+    }
+
+    /**
+     * Vê e edita posts de QUALQUER autor (listagem, estatísticas,
+     * filtro de autor, show, edit, update, preview).
+     */
     public function canManageAllPosts(): bool
+    {
+        return $this->isAdmin() || $this->isEditor() || $this->isReviewer();
+    }
+
+    /**
+     * Exclui posts de outros autores. Revisor NÃO exclui posts alheios.
+     * (Para permitir, adicione "|| $this->isReviewer()".)
+     */
+    public function canDeleteAllPosts(): bool
     {
         return $this->isAdmin() || $this->isEditor();
     }

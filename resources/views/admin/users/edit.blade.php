@@ -77,6 +77,8 @@
                             <option value="Edição & Design" {{ old('department', $user->department) === 'Edição & Design' ? 'selected' : '' }}>Edição & Design</option>
                             <option value="Tecnologia" {{ old('department', $user->department) === 'Tecnologia' ? 'selected' : '' }}>Tecnologia</option>
                             <option value="Comercial & Marketing" {{ old('department', $user->department) === 'Comercial & Marketing' ? 'selected' : '' }}>Comercial & Marketing</option>
+                            <option value="Fundadora" {{ old('department', $user->department) === 'Fundadora' ? 'selected' : '' }}>Fundadora</option>
+
                         </select>
                         @error('department')
                             <div class="invalid-feedback">{{ $message }}</div>

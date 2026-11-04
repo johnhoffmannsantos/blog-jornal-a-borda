@@ -6,97 +6,30 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * NOTA: a listagem (index) fica em App\Http\Controllers\AdminPostIndexController
+ * (ver routes/web.php). O index() antigo deste controller era código morto
+ * (a rota usa ->except(['index'])) e foi removido para evitar divergência.
+ */
 class PostController extends Controller
 {
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-
-        // 🔴 RESET: Se vier o comando clear, limpa a sessão na hora
-        if ($request->has('clear')) {
-            session()->forget('admin_posts_filters');
-            return redirect()->route('admin.posts.index');
-        }
-
-        // 1. Definição das chaves de filtros reais que queremos monitorar e persistir
-        $filterKeys = ['search', 'status', 'visibility', 'category', 'author', 'published_from', 'published_to', 'dir', 'page'];
-
-        // 2. ✨ DETECÇÃO PRECISA: Se o usuário acessou a página SEM nenhum filtro ativo na URL
-        // mas nós temos o histórico guardado na sessão, nós forçamos o redirecionamento injetando os filtros.
-        if (!$request->filled('status') && !$request->filled('search') && !$request->filled('category') && !$request->filled('visibility') && session()->has('admin_posts_filters')) {
-            return redirect()->route('admin.posts.index', session('admin_posts_filters'));
-        }
-
-        // 3. Se ele preencheu algum filtro ou mudou de página, atualizamos a memória da sessão
-        if ($request->anyFilled(['status', 'search', 'category', 'visibility']) || $request->has('page')) {
-            // Guarda estritamente as chaves válidas, descartando tokens ou inputs ocultos do HTML
-            session(['admin_posts_filters' => $request->only($filterKeys)]);
-        }
-
-        $query = Post::with(['author', 'category', 'tags']);
-
-        // Query base para estatísticas (sem filtros de busca/filtro)
-        $statsQuery = Post::query();
-        if (!$user->canManageAllPosts()) {
-            $statsQuery->where('author_id', $user->id);
-        }
-
-        // Calcular estatísticas
-        $stats = [
-            'total' => (clone $statsQuery)->count(),
-            'published' => (clone $statsQuery)->where('status', 'published')->count(),
-            'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
-        ];
-
-        // Filtros baseados no role
-        if (!$user->canManageAllPosts()) {
-            $query->where('author_id', $user->id);
-        }
-
-        // Filtro por status
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status', $request->status);
-        }
-
-        // Filtro por categoria
-        if ($request->has('category') && $request->category !== '') {
-            $query->where('category_id', $request->category);
-        }
-
-        // Busca
-        if ($request->has('search') && $request->search !== '') {
-            $query->where('title', 'like', '%' . $request->search . '%');
-        }
-
-        // 1. Procura os posts no banco ordenados por data de criação
-        $postsPaginated = $query->orderBy('created_at', 'desc')->paginate(15);
-
-        // 2. REORDENAÇÃO COMPATÍVEL COM QUALQUER BANCO DE DADOS (PHP Collection)
-        $sortedItems = $postsPaginated->getCollection()->sortBy(function ($post) {
-            return $post->status === 'published' ? 1 : 0;
-        });
-
-        // 3. Devolve a coleção reordenada mantendo a paginação intacta
-        $posts = $postsPaginated->setCollection($sortedItems);
-
-        $categories = Category::all();
-
-        // Garante que a variável $authors exigida no seu formulário offcanvas seja injetada corretamente
-        $authors = Auth::user()->isAdmin() ? \App\Models\User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
-
-        return view('admin.posts.index', compact('posts', 'categories', 'stats', 'authors'));
-    }
-
     public function preview($id)
     {
         $post = Post::with(['author', 'category', 'tags', 'comments.replies'])
             ->findOrFail($id);
+
+        $user = Auth::user();
+
+        if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
+            abort(403, 'Você não tem permissão para visualizar este post.');
+        }
 
         $previousPost = null;
         $nextPost = null;
@@ -117,7 +50,7 @@ class PostController extends Controller
     {
         $categories = Category::all();
         $tags = Tag::all();
-        $authors = Auth::user()->isAdmin() ? \App\Models\User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
+        $authors = Auth::user()->isAdmin() ? User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
         return view('admin.posts.create', compact('categories', 'tags', 'authors'));
     }
 
@@ -211,7 +144,7 @@ class PostController extends Controller
         $categories = Category::all();
         $tags = Tag::all();
         $postTags = $post->tags->pluck('id')->toArray();
-        $authors = Auth::user()->isAdmin() ? \App\Models\User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
+        $authors = Auth::user()->isAdmin() ? User::where('is_active', true)->orderBy('name')->get() : collect([Auth::user()]);
 
         return view('admin.posts.edit', compact('post', 'categories', 'tags', 'postTags', 'authors'));
     }
@@ -304,7 +237,8 @@ class PostController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->canManageAllPosts() && $post->author_id !== $user->id) {
+        // Excluir post alheio: apenas admin/editor. Qualquer um pode excluir o próprio.
+        if (!$user->canDeleteAllPosts() && $post->author_id !== $user->id) {
             abort(403, 'Você não tem permissão para excluir este post.');
         }
 
