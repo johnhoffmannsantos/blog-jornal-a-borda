@@ -21,7 +21,18 @@ use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\JournalEditionController as AdminJournalEditionController;
 use App\Http\Controllers\JournalEditionController;
 use App\Http\Controllers\Admin\SettingsController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+
+// ⚠️ ROTA TEMPORÁRIA DE CORREÇÃO DO BANCO (Remover após executar)
+Route::get('/fix-database-roles-temp', function () {
+    try {
+        DB::statement("ALTER TABLE users MODIFY COLUMN role VARCHAR(50) NOT NULL DEFAULT 'author'");
+        return '<h1>Sucesso!</h1><p>A coluna <strong>role</strong> foi alterada para VARCHAR(50). Pode cadastrar usuários com a função reviewer agora.</p>';
+    } catch (\Throwable $e) {
+        return '<h1>Erro:</h1><p>' . $e->getMessage() . '</p>';
+    }
+});
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -56,7 +67,7 @@ Route::middleware('auth')->prefix('painel')->name('admin.')->group(function () {
     Route::get('posts', AdminPostIndexController::class)->name('posts.index');
     Route::resource('posts', AdminPostController::class)->except(['index']);
     Route::get('posts/{post}/preview', [AdminPostController::class, 'preview'])
-    ->name('posts.preview');
+        ->name('posts.preview');
 
     // Categories
     Route::resource('categories', AdminCategoryController::class);
@@ -95,5 +106,3 @@ Route::post('/{slug}/comentario', [PostController::class, 'storeComment'])->name
 
 // Post Route (must be last)
 Route::get('/{slug}', [PostController::class, 'show'])->name('post.show');
-
-// Deploy trigger: layout equipe e filtros atualizados

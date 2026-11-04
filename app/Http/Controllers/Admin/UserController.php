@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -16,6 +17,15 @@ class UserController extends Controller
     {
         if (!Auth::user()->isAdmin()) {
             abort(403, 'Acesso negado. Apenas administradores podem gerenciar usuários.');
+        }
+    }
+
+    private function ensureRoleColumnIsVarchar(): void
+    {
+        try {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role VARCHAR(50) NOT NULL DEFAULT 'author'");
+        } catch (\Throwable) {
+            // Ignora se a coluna já tiver sido alterada ou não suportar o comando
         }
     }
 
@@ -89,6 +99,9 @@ class UserController extends Controller
             'avatar'      => ['nullable', 'url', 'max:500'],
         ]);
 
+        // Ajusta a coluna role no MySQL antes de persistir o novo usuário
+        $this->ensureRoleColumnIsVarchar();
+
         $user = User::create([
             'name'       => $validated['name'],
             'email'      => $validated['email'],
@@ -137,6 +150,9 @@ class UserController extends Controller
             'avatar_file' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password'    => ['nullable', 'min:8', 'confirmed'],
         ]);
+
+        // Ajusta a coluna role no MySQL antes de atualizar o usuário
+        $this->ensureRoleColumnIsVarchar();
 
         $user->name       = $validated['name'];
         $user->email      = $validated['email'];
