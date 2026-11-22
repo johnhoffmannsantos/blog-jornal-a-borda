@@ -180,11 +180,7 @@ class BlogSeeder extends Seeder
             // Associar tags aleatórias
             $tagsCollection = collect($tags);
             $randomTags = $tagsCollection->random(rand(1, 3));
-            if (is_array($randomTags)) {
-                $post->tags()->attach($randomTags);
-            } else {
-                $post->tags()->attach($randomTags->id);
-            }
+            $post->tags()->attach($randomTags->pluck('id'));
         }
     }
 }
