@@ -22,7 +22,7 @@
                     <div class="edition-cover">
                         @if($edition->cover_image)
                          <img
-                            src="{{ asset('storage/' . $edition->cover_image) }}"
+                            src="{{ $edition->cover_image }}"
                             alt="{{ $edition->title }}"
                             class="img-fluid">
                         @else
