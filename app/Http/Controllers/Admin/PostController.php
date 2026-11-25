@@ -94,7 +94,7 @@ class PostController extends Controller
             $file = $request->file('featured_image_file');
             $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs('posts/featured', $filename, 'public');
-            $featuredImage = Storage::disk('public')->url($path);
+            $featuredImage = '/storage/'.$path;
         }
 
         $authorId = Auth::user()->isAdmin() && isset($validated['author_id']) && $validated['author_id']
@@ -193,7 +193,7 @@ class PostController extends Controller
 
         if ($request->hasFile('featured_image_file')) {
             if ($post->featured_image && str_contains($post->featured_image, '/storage/posts/featured/')) {
-                $oldPath = str_replace(Storage::disk('public')->url(''), '', $post->featured_image);
+                $oldPath = str_replace('/storage/', '', $post->featured_image);
                 if (Storage::disk('public')->exists($oldPath)) {
                     Storage::disk('public')->delete($oldPath);
                 }
@@ -202,7 +202,7 @@ class PostController extends Controller
             $file = $request->file('featured_image_file');
             $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs('posts/featured', $filename, 'public');
-            $featuredImage = Storage::disk('public')->url($path);
+            $featuredImage = '/storage/'.$path;
         }
 
         $authorId = $post->author_id;

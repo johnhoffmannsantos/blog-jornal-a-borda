@@ -19,6 +19,19 @@ class Post extends Model
         'published_at' => 'datetime',
     ];
 
+    public function getFeaturedImageAttribute($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if (str_contains($value, '/storage/')) {
+            return strstr($value, '/storage/');
+        }
+
+        return $value;
+    }
+
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
